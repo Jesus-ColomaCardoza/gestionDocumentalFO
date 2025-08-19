@@ -24,19 +24,19 @@ import { formatFileSize } from "../../utils/Methods";
 import TramiteDestinosModal from "./TramiteDestinosModal";
 import { MovimientoEntity } from "../../movimiento/interfaces/MovimientoInterface";
 import { emptyMovimiento } from "../../movimiento/utils/Constants";
-import { InputSwitch, InputSwitchChangeEvent } from "primereact/inputswitch";
+import { InputSwitchChangeEvent } from "primereact/inputswitch";
 import { InputNumber, InputNumberChangeEvent } from "primereact/inputnumber";
 import UseFile from "../../file/hooks/UseFile";
 import UseAnexo from "../../anexo/hooks/UseAnexo";
 import { AnexoEntity } from "../../anexo/interfaces/AnexoInterface";
 import { useNavigate } from "react-router-dom";
-import { RadioButton } from "primereact/radiobutton";
 import { Toolbar } from "primereact/toolbar";
-import { TabPanel, TabView, TabViewTabChangeEvent } from "primereact/tabview";
-import TramiteRecibidoAtendidoModal from "./TramiteRecibidoAtendidoModal";
-import { Calendar } from "primereact/calendar";
+import { Menu } from "primereact/menu";
+import { Checkbox } from "primereact/checkbox";
+import TyCModal from "./TyCModal";
+import { Message } from "primereact/message";
 
-const TramiteRecibidoAtendido = () => {
+const MesaDePartes = () => {
   // custom hooks
   const { themePrimeFlex } = useTheme();
 
@@ -67,9 +67,9 @@ const TramiteRecibidoAtendido = () => {
 
   const anexosRef = useRef<HTMLInputElement>(null);
 
-  const [showAnexos, setShowAnexos] = useState<boolean>(false);
-
   //useStates
+  const [typePerson, setTypePerson] = useState(0);
+
   const [submitted, setSubmitted] = useState<boolean>(false);
 
   const [loading, setLoading] = useState<boolean>(true);
@@ -651,183 +651,132 @@ const TramiteRecibidoAtendido = () => {
   }, []);
 
   return (
-    <div className="card p-0 m-auto">
+    <div
+      className="card"
+      style={{
+        display: "flex",
+        flexDirection: "column",
+        padding: "0",
+        width: "50%",
+      }}
+    >
       <Toast ref={toast} position={"bottom-right"} />
 
       <Toolbar
         style={{
           margin: "0",
           padding: "0",
-          marginBottom: "1em",
+          marginBottom: ".5em",
           border: "none",
         }}
         start={
-          <div className="flex flex-column p-1 gap-2">
-            <h3 className="m-0">Consulta el estado de tu trámite</h3>
-          </div>
+          <label className="block text-2xl font-medium mb-3">
+            Mesa de partes virtual
+          </label>
         }
       />
 
-      <div className="flex flex-row flex-wrap justify-content-start gap-3">
-        <div
-          className="flex flex-column flex-wrap gap-1 border-solid border-1 border-gray-500 border-round-md"
-          style={{ width: "30%"}}
-        >
-          <div className="flex flex-column gap-3" style={{ height: "65vh" }}>
-            <img
-              style={{ height: "100%", width: "100%", objectFit: "contain" }}
-              src={
-                "https://static.docsity.com/documents_first_pages/2020/12/02/7381653ecc56f884b0c9e1ccb5dae66c.png"
-              }
-              alt="Logo de sistema documental"
-            />
+      <div className="flex flex-column gap-1 justify-content-between mb-2 border-solid border-1 border-gray-500 border-round-md">
+        <div className="flex flex-row gap-3 justify-content-start align-items-center py-3 px-4 border-bottom-1 border-gray-500">
+          <div>
+            <i className="pi pi-check-circle text-xl" style={{
+              color:"#4a4"
+            }}></i>
+          </div>
+          <div>
+            <label className="block text-900 font-medium mb-1">
+              Registro exitoso
+            </label>
+            <span className="text-xs">
+              Tu documento ha sido registrado y enviado a mesa de partes
+            </span>
           </div>
         </div>
 
-        <div
-          className="flex flex-column justify-content-between border-solid border-1 border-gray-500 border-round-md"
-          style={{ width: "30%" }}
-        >
-          <div className="flex flex-column">
-            <div className="flex flex-row align-items-center py-3 mb-3 px-4 border-bottom-1 border-gray-500">
-              <label className="block text-900 font-medium">
-                Datos de trámite
-              </label>
-            </div>
-
-            <div className="flex flex-column px-4">
-              <label
-                htmlFor="CodigoReferencia"
-                className="block text-900 text-sm font-medium mb-2"
-              >
-                Código único de trámite
-              </label>
-              <div className="flex flex-column mb-3 gap-1">
-                <div className="p-inputgroup">
-                  <InputText
-                    id="CodigoReferencia"
-                    value={tramite.CodigoReferencia}
-                    onChange={(e) => {
-                      onInputTextChange(e, "CodigoReferencia");
-                    }}
-                    type="text"
-                    className="p-inputtext-sm "
-                  />
-                </div>
-                {tramiteErrors.CodigoReferencia && (
-                  <small className="p-error">
-                    {tramiteErrors.CodigoReferencia}
-                  </small>
-                )}
-              </div>
-            </div>
-
-            <div className="flex flex-column px-4">
-              <label
-                htmlFor="CodigoReferencia"
-                className="block text-900 text-sm font-medium mb-2"
-              >
-                Fecha
-              </label>
-              <div className="flex flex-column mb-3 gap-1">
-                <div className="p-inputgroup">
-                  <Calendar
-                    value={null}
-                    onChange={(e) => {}}
-                    dateFormat="mm/dd/yy"
-                    placeholder="mm/dd/yyyy"
-                    mask="99/99/9999"
-                  />
-                </div>
-                {tramiteErrors.CodigoReferencia && (
-                  <small className="p-error">
-                    {tramiteErrors.CodigoReferencia}
-                  </small>
-                )}
-              </div>
-            </div>
-
-            <div className="flex flex-column px-4">
-              <label
-                htmlFor="CodigoReferencia"
-                className="block text-900 text-sm font-medium mb-2"
-              >
-                Validación
-              </label>
-              <div className="flex flex-column mb-3 gap-1">
-                <div className="p-inputgroup">
-                  <InputText
-                    id="CodigoReferencia"
-                    value={tramite.CodigoReferencia}
-                    onChange={(e) => {
-                      onInputTextChange(e, "CodigoReferencia");
-                    }}
-                    type="text"
-                    className="p-inputtext-sm "
-                  />
-                </div>
-                {tramiteErrors.CodigoReferencia && (
-                  <small className="p-error">
-                    {tramiteErrors.CodigoReferencia}
-                  </small>
-                )}
-              </div>
-            </div>
+        <div className="flex flex-row py-1 px-4" style={{ gap: "1rem" }}>
+          <div
+            style={{
+              width: "100%",
+            }}
+          >
+            <label className="block text-900 text-sm font-medium mb-2">
+              CÓDIGO ÚNICO DE TRÁMITE
+            </label>
+            <span className="block text-900 text-xs mb-2">00000000000089</span>
           </div>
+        </div>
 
-          <div className="flex flex-row py-3 px-4" style={{ gap: "1rem" }}>
-            <Button
-              type="button"
-              onClick={() => {
-                // if (validateForm()) {
-                //   createTramiteEmitido();
-                // }
-                navigate("/tramite/seguimiento/resultado")
-              }}
-              size="small"
-              style={{
-                padding: "0",
-                width: "100%",
-                height: "2.5rem",
-                margin: "0",
-                color: "#000",
-              }}
-            >
-              <span className="flex justify-content-between gap-2 align-items-center m-auto text-white">
-                <i className="pi pi-search text-sm"></i>
-                <span>Consultar</span>
-              </span>
-            </Button>
+        <div className="flex flex-row py-1 px-4" style={{ gap: "1rem" }}>
+          <div
+            style={{
+              width: "100%",
+            }}
+          >
+            <label className="block text-900 text-sm font-medium mb-2">
+              FECHA DE REGISTRO
+            </label>
+            <span className="block text-900 text-xs mb-2">
+              {new Date().toLocaleString()}
+            </span>
           </div>
+        </div>
+
+        <div className="flex flex-row py-1 px-4" style={{ gap: "1rem" }}>
+          <div
+            style={{
+              width: "100%",
+            }}
+          >
+            <label className="block text-900 text-sm font-medium mb-2">
+              REMITENTE
+            </label>
+            <span className="block text-900 text-xs mb-2">Archivo digital</span>
+          </div>
+        </div>
+
+        <div className="flex flex-row justify-content-end p-2 border-top-1 border-gray-500 ">
+          <Button
+            type="button"
+            severity="warning"
+            onClick={() => {
+              loadFilesRef.current?.click();
+            }}
+            size="small"
+            style={{
+              padding: "0",
+              width: "9rem",
+              height: "2.5rem",
+              margin: "0",
+              color: "#fff",
+            }}
+          >
+            <span className="flex justify-content-between gap-2 align-items-center m-auto text-white">
+              <i className="pi pi-print text-sm"></i>
+              <span>Imprimir</span>
+            </span>
+          </Button>
         </div>
       </div>
 
-      <FileManagerModal
-        submitted={submitted}
-        hideFileManagerDialog={hideFileManagerDialog}
-        fileManagerDialog={fileManagerDialog}
-        selectedDigitalFiles={selectedDigitalFiles}
-        setSelectedDigitalFiles={setSelectedDigitalFiles}
-      />
-
-      <TramiteDestinosModal
-        submitted={submitted}
-        hideTramiteDestinosDialog={hideTramiteDestinosDialog}
-        tramiteDestinosDialog={tramiteDestinosDialog}
-        selectedTramiteDestinos={selectedTramiteDestinos}
-        setSelectedTramiteDestinos={setSelectedTramiteDestinos}
-        tramiteDestinosErrors={tramiteDestinosErrors}
-        setTramiteDestinosErrors={setTramiteDestinosErrors}
-        movimiento={movimiento}
-        areas={areas}
-        remitentes={remitentes}
-        setMovimiento={setMovimiento}
-        onInputTextChange={onInputTextChange}
-        onDropdownChangeMovimiento={onDropdownChangeMovimiento}
-        onSwitchChange={onSwitchChange}
-      />
+      <div
+        className="flex flex-row gap-3 justify-content-start align-items-center p-3 border-bottom-1 border-gray-500"
+        style={{
+          background: "rgba(102, 167, 197, 1)",
+          color: "#fff",
+        }}
+      >
+        <div>
+          <i className="pi pi-info-circle text-xl"></i>
+        </div>
+        <div>
+          <span className="text-xs">
+            Conserve el código único de trámite para una consulta posterior del
+            seguimiento de su trámite{" "}
+          </span>
+        </div>
+      </div>
     </div>
   );
 };
 
-export default TramiteRecibidoAtendido;
+export default MesaDePartes;

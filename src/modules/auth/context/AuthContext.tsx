@@ -64,6 +64,12 @@ export const AuthProvider = ({ children }: AuthPoroviderProps) => {
     "/auth/forgot_password",
     "/auth/reset_password/:token",
 
+    "/inicio",
+    "/tramite/nuevo",
+
+
+
+
     //firma digital
     "/firma_digital/archivos_digitales",
 

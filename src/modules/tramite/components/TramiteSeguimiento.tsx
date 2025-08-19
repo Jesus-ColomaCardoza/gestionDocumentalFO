@@ -14,7 +14,6 @@ const TramiteSeguimiento = () => {
   // custom hooks
   const { themePrimeFlex } = useTheme();
 
-  const { userAuth } = useAuth()!;
 
   const navigate = useNavigate();
 

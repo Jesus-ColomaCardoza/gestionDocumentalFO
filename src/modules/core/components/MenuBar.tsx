@@ -1,4 +1,4 @@
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { useTheme } from "../../../ThemeContext";
 import { Menubar } from "primereact/menubar";
 import { Badge } from "primereact/badge";
@@ -6,6 +6,7 @@ import { Avatar } from "primereact/avatar";
 import { Button } from "primereact/button";
 import { useAuth } from "../../auth/context/AuthContext";
 import { useEffect } from "react";
+import { Tooltip } from "primereact/tooltip";
 
 type MenuBarProps = {
   visible?: boolean;
@@ -16,26 +17,20 @@ const MenuBar = (props: MenuBarProps) => {
   const { themePrimeFlex, switchTheme } = useTheme();
 
   const auth = useAuth();
+
   const logout = auth?.logout;
+
+  const navigate = useNavigate();
 
   const itemRenderer = (item: any) => (
     <Link
       className={`flex align-items-center p-menuitem-link p-2 ${
         themePrimeFlex === "light" ? "text-white hover:text-900" : ""
       } `}
-      to={"/dashboard"}
+      to={item.url}
     >
       <span className={item.icon} />
       <span className="mx-2">{item.label}</span>
-      {item.badge && <Badge className="ml-auto" value={item.badge} />}
-      {item.shortcut && (
-        <span
-          className="ml-auto border-1  text-xs "
-          style={{ borderRadius: "5px", borderColor: "#555" }}
-        >
-          {item.shortcut}
-        </span>
-      )}
     </Link>
   );
 
@@ -52,29 +47,30 @@ const MenuBar = (props: MenuBarProps) => {
   );
 
   const itemRenderer3 = (item: any) => (
-    <div
-      className={`flex align-items-center  p-menuitem-link px-3 py-2  ${
-        themePrimeFlex === "light" ? "text-white hover:text-900 " : ""
-      } `}
+    <a
+      href={item.url}
+      target="_blank"
+      rel="noopener noreferrer"
+      className={`flex align-items-center p-menuitem-link px-3 py-2 ${
+        themePrimeFlex === "light" ? "text-white hover:text-900" : ""
+      }`}
     >
       <span className={item.icon} />
       <span className="mx-2">{item.label}</span>
-    </div>
+    </a>
   );
 
   const items: any[] = [
     {
       label: "Nuevo Trámite",
       icon: "pi pi-file-plus",
-      url: "dashboard",
-      template: itemRenderer3,
+      url: "/tramite/nuevo",
+      template: itemRenderer,
     },
     {
       label: "Seguimiento",
       icon: "pi pi-search",
-      command: () => {
-        logout?.();
-      },
+      url: "/tramite/seguimiento",
       template: itemRenderer3,
     },
     {
@@ -85,31 +81,34 @@ const MenuBar = (props: MenuBarProps) => {
       },
       template: itemRenderer3,
     },
-    // {
-    //   label: "Home v2",
-    //   icon: "pi pi-envelope",
-    //   badge: 6,
-    //   template: itemRenderer,
-    // },
   ];
 
   const start = (
-    <div className="flex align-items-center">
-      <img
-        alt="logo"
-        src="https://us.123rf.com/450wm/breizhatao/breizhatao2303/breizhatao230300075/200640330-flag-of-peru-painted-on-a-cinder-block-wall.jpg?ver=6"
-        // src="https://images.teepublic.com/derived/production/designs/15223072_0/1603168989/i_p:c_000000,s_630,q_90.jpg"
-        // src="https://res.cloudinary.com/teepublic/image/private/s--Tt6RHArX--/t_Resized%20Artwork/c_fit,g_north_west,h_954,w_954/co_000000,e_outline:48/co_000000,e_outline:inner_fill:48/co_ffffff,e_outline:48/co_ffffff,e_outline:inner_fill:48/co_bbbbbb,e_outline:3:1000/c_mpad,g_center,h_1260,w_1260/b_rgb:eeeeee/c_limit,f_auto,h_630,q_auto:good:420,w_630/v1603168989/production/designs/15223072_0.jpg"
-        height="40"
-        className="ml-2"
-        style={{
-          borderRadius: "100%",
-          width: "2rem",
-          height: "2rem",
-          margin: "0 1em",
+    <>
+      <Tooltip target=".logox" mouseTrack mouseTrackTop={30} mouseTrackLeft={10} />
+      <div
+        className="logox  flex align-items-center"
+        data-pr-tooltip="Inicio"
+        onClick={() => {
+          navigate("/inicio");
         }}
-      />
-    </div>
+      >
+        <img
+          alt="logo"
+          src="https://us.123rf.com/450wm/breizhatao/breizhatao2303/breizhatao230300075/200640330-flag-of-peru-painted-on-a-cinder-block-wall.jpg?ver=6"
+          // src="https://images.teepublic.com/derived/production/designs/15223072_0/1603168989/i_p:c_000000,s_630,q_90.jpg"
+          // src="https://res.cloudinary.com/teepublic/image/private/s--Tt6RHArX--/t_Resized%20Artwork/c_fit,g_north_west,h_954,w_954/co_000000,e_outline:48/co_000000,e_outline:inner_fill:48/co_ffffff,e_outline:48/co_ffffff,e_outline:inner_fill:48/co_bbbbbb,e_outline:3:1000/c_mpad,g_center,h_1260,w_1260/b_rgb:eeeeee/c_limit,f_auto,h_630,q_auto:good:420,w_630/v1603168989/production/designs/15223072_0.jpg"
+          height="40"
+          className="ml-2"
+          style={{
+            borderRadius: "100%",
+            width: "2rem",
+            height: "2rem",
+            margin: "0 1em",
+          }}
+        />
+      </div>
+    </>
   );
 
   const end = (

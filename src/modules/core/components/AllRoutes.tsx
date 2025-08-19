@@ -29,6 +29,7 @@ import TramiteRecibidoDerivado from "../../tramite/components/TramiteRecibidoDer
 import TramiteRecibidoDerivados from "../../tramite/components/TramiteRecibidoDerivados";
 import TramiteRecibidoExterno from "../../tramite/components/TramiteRecibidoExterno";
 import TramiteRecibidoAtendido from "../../tramite/components/TramiteRecibidoAtendido";
+import MesaDePartes from "../../tramite/components/MesaDePartes";
 
 const AllRoutes = () => {
   return (
@@ -45,7 +46,13 @@ const AllRoutes = () => {
 
 
             <Route path="/" element={<Dashboard />}>
-              <Route path="/inicio" element={<TramiteEmitidoNuevo />}></Route>
+              <Route path="inicio" element={<TramiteEmitidoNuevo />}></Route>
+              <Route path="mesa_de_partes" element={<MesaDePartes />}></Route>
+              <Route path="tramite/nuevo" element={<TramiteRecibidoExterno />}></Route>
+              <Route path="tramite/seguimiento" element={<TramiteRecibidoAtendido />}></Route>
+              <Route path="tramite/seguimiento/resultado" element={<TramiteSeguimiento />}></Route>
+
+
 
               <Route path="firma_digital/archivos_digitales" element={<TramiteEmitidoNuevo />}></Route>
 
@@ -60,7 +67,7 @@ const AllRoutes = () => {
               <Route path="tramite/emitido" element={<TramiteEmitido />}></Route>
               <Route path="tramite/emitido/nuevo" element={<TramiteEmitidoNuevo />}></Route>
               
-              <Route path="mantenimiento/usuario" element={<Usuario />}></Route>
+              {/* <Route path="mantenimiento/usuario" element={<Usuario />}></Route>
               <Route path="mantenimiento/empresa" element={<Empresa />}></Route>
               <Route path="mantenimiento/constante" element={<Constante />}></Route>
               <Route path="mantenimiento/area" element={<Area />}></Route>
@@ -71,7 +78,7 @@ const AllRoutes = () => {
               <Route path="mantenimiento/tipo_documento" element={<TipoDocumento />}></Route>
               <Route path="mantenimiento/tipo_usuario" element={<TipoUsuario />}></Route>
               <Route path="mantenimiento/tipo_tramite" element={<TipoTramite />}></Route>
-              <Route path="mantenimiento/tipo_identificacion" element={<TipoIdentificacion />}></Route>
+              <Route path="mantenimiento/tipo_identificacion" element={<TipoIdentificacion />}></Route> */}
             </Route>
 
             <Route path="nofound" element={<NotFound />}></Route>

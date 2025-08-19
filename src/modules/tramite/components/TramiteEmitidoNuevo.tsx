@@ -31,7 +31,7 @@ import UseAnexo from "../../anexo/hooks/UseAnexo";
 import { AnexoEntity } from "../../anexo/interfaces/AnexoInterface";
 import { useNavigate } from "react-router-dom";
 import { Toolbar } from "primereact/toolbar";
-import portada from '../../../assets/img/portada.svg'
+import portada from "../../../assets/img/portada.svg";
 
 const TramiteEmitidoNuevo = () => {
   // custom hooks
@@ -646,14 +646,16 @@ const TramiteEmitidoNuevo = () => {
   }, []);
 
   return (
-    <div className="card p-0 m-0" >
+    <div className="card p-0 m-0">
       <Toast ref={toast} position={"bottom-right"} />
 
-
-      <div className="flex flex-row flex-wrap justify-content-between" style={{height:"80vh"}}>
+      <div
+        className="flex flex-row flex-wrap justify-content-between"
+        style={{ minHeight: "80vh" }}
+      >
         <div
           className="flex flex-column flex-wrap gap-1"
-          style={{ width: "60%", margin:"auto" }}
+          style={{ width: "60%", margin: "auto" }}
         >
           <div className="flex flex-row py-2 px-4" style={{ gap: "1rem" }}>
             <div
@@ -661,10 +663,8 @@ const TramiteEmitidoNuevo = () => {
                 width: "100%",
               }}
             >
-              <label
-                className="block text-6xl font-medium mb-6 text-center"
-              >
-                Sistema Integral de Gestión <br/> Documental
+              <label className="block text-6xl font-medium mb-6 text-center">
+                Sistema Integral de Gestión <br /> Documental
               </label>
 
               <p className="text-justify">
@@ -680,7 +680,10 @@ const TramiteEmitidoNuevo = () => {
 
               <strong>Procedimientos para la recepción de documentos</strong>
 
-              <ul className="flex flex-column gap-2" style={{paddingRight:"20em"}}>
+              <ul
+                className="flex flex-column gap-2"
+                style={{ paddingRight: "15em" }}
+              >
                 <li>
                   Lorem ipsum dolor sit amet, consectetur adipisicing elit.
                   Similique, placeat voluptatibus ad itaque laudantium ipsa
@@ -706,7 +709,9 @@ const TramiteEmitidoNuevo = () => {
           <div className="flex flex-row pb-3 px-4" style={{ gap: "1rem" }}>
             <Button
               type="button"
-              // onClick={findAllTramite}
+              onClick={() => {
+                navigate("/tramite/nuevo");
+              }}
               size="small"
               severity="info"
               style={{
@@ -715,7 +720,7 @@ const TramiteEmitidoNuevo = () => {
                 height: "2.5rem",
                 margin: "0",
                 color: "#eee",
-                background:"#538ad3ff",
+                background: "#538ad3ff",
                 border: "none",
               }}
             >
@@ -728,9 +733,10 @@ const TramiteEmitidoNuevo = () => {
             <Button
               type="button"
               onClick={() => {
-                if (validateForm()) {
-                  createTramiteEmitido();
-                }
+                navigate("/tramite/seguimiento")
+                // if (validateForm()) {
+                //   createTramiteEmitido();
+                // }
               }}
               size="small"
               severity="secondary"
@@ -752,13 +758,13 @@ const TramiteEmitidoNuevo = () => {
 
         <div
           className="flex flex-column justify-content-between"
-          style={{ width: "35%", objectFit:"cover", margin:"auto"}}
+          style={{ width: "35%", objectFit: "cover", margin: "auto" }}
         >
-          <div className="flex flex-column gap-3" style={{height:"100%",width:"100%"}}>
-            <img
-              src={portada}
-              alt="Logo de sistema documental"
-            />
+          <div
+            className="flex flex-column gap-3"
+            style={{ height: "100%", width: "100%" }}
+          >
+            <img src={portada} alt="Logo de sistema documental" />
           </div>
         </div>
       </div>

@@ -33,6 +33,7 @@ import { useNavigate } from "react-router-dom";
 import { Toolbar } from "primereact/toolbar";
 import { Menu } from "primereact/menu";
 import { Checkbox } from "primereact/checkbox";
+import TyCModal from "./TyCModal";
 
 const TramiteRecibidoExterno = () => {
   // custom hooks
@@ -117,6 +118,8 @@ const TramiteRecibidoExterno = () => {
   const [selectedLoadFiles, setSelectedLoadFiles] = useState<File[]>([]);
 
   const [selectedAnexos, setSelectedAnexos] = useState<File[]>([]);
+
+  const [tyCModal, setTyCModal] = useState<boolean>(true);
 
   //functions
   const createTramiteEmitido = async () => {
@@ -1549,10 +1552,7 @@ const TramiteRecibidoExterno = () => {
 
       <div className="flex flex-column justify-content-between mb-3 border-solid border-1 border-gray-500 border-round-md">
         <div className="flex flex-column gap-1"></div>
-        <div
-          className="flex flex-row py-3 px-4"
-          style={{ gap: "3rem" }}
-        >
+        <div className="flex flex-row py-3 px-4" style={{ gap: "3rem" }}>
           <div
             style={{
               width: "50%",
@@ -1650,9 +1650,10 @@ const TramiteRecibidoExterno = () => {
         <Button
           type="button"
           onClick={() => {
-            if (validateForm()) {
-              createTramiteEmitido();
-            }
+            navigate("/mesa_de_partes")
+            // if (validateForm()) {
+            //   createTramiteEmitido();
+            // }
           }}
           size="small"
           style={{
@@ -1669,6 +1670,8 @@ const TramiteRecibidoExterno = () => {
           </span>
         </Button>
       </div>
+
+      <TyCModal tyCModal={tyCModal} setTyCModal={setTyCModal} />
     </div>
   );
 };
