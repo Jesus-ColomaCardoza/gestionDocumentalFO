@@ -6,18 +6,17 @@ import { Message } from "../../utils/Interfaces";
 type Fecha = Date | string | null;
 export interface TramiteEntity {
   IdTramite: number;
-  CodigoReferencia: string;
-  Asunto: string;
+  CodigoReferenciaTram: string;
   Descripcion: string;
-  Observaciones: string;
+  Detalle: string;
   FechaInicio: Fecha;
   FechaFin: Fecha;
-  Folios: number;
-  IdRemitente: number;
   IdTipoTramite: number;
-  IdTipoDocumento: number;
   IdAreaEmision: number;
+  IdRemitente: number;
   IdEstado: number;
+  IdDocumento: number;
+  IdArchivador: number;
   Activo: boolean;
   CreadoEl: Date;
   CreadoPor: string;
@@ -25,10 +24,6 @@ export interface TramiteEntity {
   ModificadoPor: string;
   TipoTramite: {
     IdTipoTramite: number;
-    Descripcion: string;
-  };
-  TipoDocumento: {
-    IdTipoDocumento: number;
     Descripcion: string;
   };
   Area: {
@@ -45,16 +40,35 @@ export interface TramiteEntity {
     IdEstado: number;
     Descripcion: string;
   };
+  Documento: {
+    IdDocumento: number,
+    NombreDocumento: string,
+    UrlDocumento: string,
+    CodigoReferenciaDoc: string,
+    Asunto: string,
+    Observaciones: string,
+    Folios: number,
+    TipoDocumento: {
+      IdTipoDocumento: number,
+      Descripcion: string,
+    },
+    Anexo: {
+      IdAnexo: number,
+      NombreAnexo: string,
+      UrlAnexo: string,
+    }[]
+  },
+  Archivador: {
+    IdArchivador: number;
+    Nombre: string;
+  };
+
   Anexo?: {
     IdAnexo: number,
     NombreAnexo: string,
     UrlAnexo: string,
   }[];
-  Documento?: {
-    IdDocumento: number,
-    NombreDocumento: string,
-    UrlDocumento: string,
-  }[];
+
   Movimiento?: {
     IdMovimiento: number,
     AreaDestino: {
@@ -63,39 +77,465 @@ export interface TramiteEntity {
   }[]
 }
 
+export interface TramitePendienteEntity {
+  IdMovimiento: number,
+  Documento: {
+    IdDocumento: number,
+    CodigoReferenciaDoc: string,
+    Asunto: string,
+    Observaciones: string,
+    Folios: number,
+    TipoDocumento: {
+      IdTipoDocumento: number,
+      Descripcion: string,
+    },
+  },
+  AreaOrigen: {
+    IdArea: number,
+    Descripcion: string,
+  },
+  AreaDestino: {
+    IdArea: number,
+    Descripcion: string,
+  },
+  Acciones: string,
+  Motivo: string,
+  FechaMovimiento: Fecha,
+  NombreResponsable: string,
+  Tramite: {
+    IdTramite: number,
+    CodigoReferenciaTram: string,
+    Descripcion: string,
+    FechaInicio: Fecha,
+    FechaFin: Fecha,
+    IdTipoTramite: number,
+    IdRemitente: number,
+    IdEstado: number,
+    IdDocumento: number,
+    TipoTramite: {
+      IdTipoTramite: number,
+      Descripcion: string,
+    },
+    Remitente: {
+      IdUsuario: number,
+      Nombres: string,
+      ApellidoPaterno: string,
+      ApellidoMaterno: string,
+      NroIdentificacion: string,
+    },
+    Estado: {
+      IdEstado: number,
+      Descripcion: string,
+    };
+    // Documento: {
+    //   IdDocumento: number,
+    //   CodigoReferenciaDoc: string,
+    //   Asunto: string,
+    //   Observaciones: string,
+    //   Folios: number,
+    //   TipoDocumento: {
+    //     IdTipoDocumento: number,
+    //     Descripcion: string,
+    //   },
+    // },
+  }
+  HistorialMovimientoxEstado?: {
+    IdHistorialMxE?: number,
+    Estado?: {
+      IdEstado?: number,
+      Descripcion?: string,
+    }
+  }[]
+}
+export interface TramiteRecibidoEntity {
+  IdMovimiento: number,
+  HistorialMovimientoxEstado: {
+    IdHistorialMxE: number,
+    FechaHistorialMxE: string,
+    IdDocumento: number,
+    Estado: {
+      IdEstado: number,
+      Descripcion: string,
+    }
+    // Observaciones:string,
+    // Detalle:string,
+  }[],
+  Documento: {
+    IdDocumento: number,
+    CodigoReferenciaDoc: string,
+    Asunto: string,
+    Observaciones: string,
+    Folios: number,
+    TipoDocumento: {
+      IdTipoDocumento: number,
+      Descripcion: string,
+    },
+  },
+  AreaOrigen: {
+    IdArea: number,
+    Descripcion: string,
+  },
+  AreaDestino: {
+    IdArea: number,
+    Descripcion: string,
+  },
+  Acciones: string,
+  Motivo: string,
+  FechaMovimiento: Fecha,
+  NombreResponsable: string,
+  Tramite: {
+    IdTramite: number,
+    CodigoReferenciaTram: string,
+    Descripcion: string,
+    FechaInicio: Fecha,
+    FechaFin: Fecha,
+    IdTipoTramite: number,
+    IdRemitente: number,
+    IdEstado: number,
+    IdDocumento: number,
+    TipoTramite: {
+      IdTipoTramite: number,
+      Descripcion: string,
+    },
+    Remitente: {
+      IdUsuario: number,
+      Nombres: string,
+      ApellidoPaterno: string,
+      ApellidoMaterno: string,
+      NroIdentificacion: string,
+    },
+    Estado: {
+      IdEstado: number,
+      Descripcion: string,
+    };
+    // Documento: {
+    //   IdDocumento: number,
+    //   CodigoReferenciaDoc: string,
+    //   Asunto: string,
+    //   Observaciones: string,
+    //   Folios: number,
+    //   TipoDocumento: {
+    //     IdTipoDocumento: number,
+    //     Descripcion: string,
+    //   },
+    // },
+  }
+}
+export interface TramiteAtendidoEntity {
+  IdMovimiento: number,
+  HistorialMovimientoxEstado: {
+    IdHistorialMxE: number,
+    FechaHistorialMxE: string,
+    IdDocumento: number,
+    Estado: {
+      IdEstado: number,
+      Descripcion: string,
+    }
+    // Observaciones:string,
+    // Detalle:string,
+  }[],
+  Documento: {
+    IdDocumento: number,
+    CodigoReferenciaDoc: string,
+    Asunto: string,
+    Observaciones: string,
+    Folios: number,
+    TipoDocumento: {
+      IdTipoDocumento: number,
+      Descripcion: string,
+    },
+  },
+  AreaOrigen: {
+    IdArea: number,
+    Descripcion: string,
+  },
+  AreaDestino: {
+    IdArea: number,
+    Descripcion: string,
+  },
+  Acciones: string,
+  Motivo: string,
+  FechaMovimiento: Fecha,
+  NombreResponsable: string,
+  Tramite: {
+    IdTramite: number,
+    CodigoReferenciaTram: string,
+    Descripcion: string,
+    FechaInicio: Fecha,
+    FechaFin: Fecha,
+    IdTipoTramite: number,
+    IdRemitente: number,
+    IdEstado: number,
+    IdDocumento: number,
+    TipoTramite: {
+      IdTipoTramite: number,
+      Descripcion: string,
+    },
+    Remitente: {
+      IdUsuario: number,
+      Nombres: string,
+      ApellidoPaterno: string,
+      ApellidoMaterno: string,
+      NroIdentificacion: string,
+    },
+    Estado: {
+      IdEstado: number,
+      Descripcion: string,
+    };
+    // Documento: {
+    //   IdDocumento: number,
+    //   CodigoReferenciaDoc: string,
+    //   Asunto: string,
+    //   Observaciones: string,
+    //   Folios: number,
+    //   TipoDocumento: {
+    //     IdTipoDocumento: number,
+    //     Descripcion: string,
+    //   },
+    // },
+  }
+}
+
 export interface TramiteCreate {
-  IdTramite?: number;
-  Descripcion: string;
-  IdEsquemaTramite?: number;
   Activo: boolean;
   CreadoEl?: Date | string;
   CreadoPor?: string;
 }
 export interface TramiteEmitidoCreate {
+  //data tramite
   IdTramite?: number;
-  CodigoReferencia: string;
-  Asunto: string;
-  Descripcion?: string;//
-  Observaciones: string;
   FechaInicio: Fecha;
-  FechaFin?: Fecha;//
-  Folios: number;
-  IdRemitente: number;
   IdTipoTramite: number;
-  IdTipoDocumento: number;
-  IdAreaEmision: number;
   IdEstado: number;
+  IdRemitente: number;
+  Remitente?: {
+    IdUsuario: number,
+    Nombres: string,
+    ApellidoPaterno: string,
+    ApellidoMaterno: string,
+  },
+  IdAreaEmision: number;
+  Area?: {
+    IdArea: number;
+    Descripcion: string;
+  };
   Activo: boolean;
   CreadoEl?: Date;
   CreadoPor?: string;
-  DigitalFiles: FileManagerEntity[];
-  TramiteDestinos: MovimientoEntity[];
-  Anexos: AnexoEntity[]
+
+  //data documento
+  CodigoReferenciaDoc: string;
+  Asunto: string;
+  Observaciones: string;
+  Folios: number;
+  IdTipoDocumento: number;
+  TipoDocumento?: {
+    IdTipoDocumento: number;
+    Descripcion: string;
+  };
+
+  //data others
+  DigitalFiles?: FileManagerEntity[];
+  TramiteDestinos?: MovimientoEntity[];
+  Anexos?: AnexoEntity[]
+}
+export interface TramiteRecibidoAtendidoCreate {
+  //NOTA EL REMITENTE AQUI ES EL IDUSUARIO EN LA TABLA DOCUMENTO
+  //data Movimiento
+  IdMovimiento?: number;
+
+  IdRemitente: number;
+  Remitente?: {
+    IdUsuario: number,
+    Nombres: string,
+    ApellidoPaterno: string,
+    ApellidoMaterno: string,
+  },
+
+  //data documento
+  CodigoReferenciaDoc: string;
+  Asunto: string;
+  Observaciones: string;
+  Folios: number;
+  Visible: boolean;
+  IdTipoDocumento: number;
+  TipoDocumento?: {
+    IdTipoDocumento: number;
+    Descripcion: string;
+  };
+  IdEstado: number;
+
+  //data others
+  DigitalFiles?: FileManagerEntity[];
+  Anexos?: AnexoEntity[]
+}
+export interface TramiteRecibidoDerivadoCreate {
+  //NOTA EL REMITENTE AQUI ES EL IDUSUARIO EN LA TABLA DOCUMENTO
+  //data Movimiento
+  Movimientos?: {
+    IdMovimiento: number,
+    Tramite: {
+      IdTramite: number,
+    }
+  }[];
+
+  IdAreaEmision: number;
+  Area?: {
+    IdArea: number;
+    Descripcion: string;
+  };
+
+  IdRemitente: number;
+  Remitente?: {
+    IdUsuario: number,
+    Nombres: string,
+    ApellidoPaterno: string,
+    ApellidoMaterno: string,
+  },
+
+  //data documento
+  Visible: boolean;
+  CodigoReferenciaDoc: string;
+  Asunto: string;
+  Observaciones: string;
+  Folios: number;
+  IdTipoDocumento: number;
+  TipoDocumento?: {
+    IdTipoDocumento: number;
+    Descripcion: string;
+  };
+  IdEstado: number;
+
+  //data others
+  TypeTab: boolean
+  Acciones: string
+  Indicaciones: string
+  DigitalFiles?: FileManagerEntity[];
+  TramiteDestinos?: MovimientoEntity[];
+  Anexos?: AnexoEntity[]
+}
+export interface TramiteExternoRecibir {
+  //data tramite
+  IdTramite?: number;
+  FechaInicio: Fecha;
+  IdTipoTramite: number;
+  IdEstado: number;
+  IdRemitente: number;
+  Remitente?: {
+    IdUsuario: number,
+    Nombres: string,
+    ApellidoPaterno: string,
+    ApellidoMaterno: string,
+  },
+  IdAreaEmision: number;
+  Area?: {
+    IdArea: number;
+    Descripcion: string;
+  };
+  Activo: boolean;
+  CreadoEl?: Date;
+  CreadoPor?: string;
+
+  //data documento
+  CodigoReferenciaDoc: string;
+  Asunto: string;
+  Observaciones: string;
+  Folios: number;
+  IdTipoDocumento: number;
+  TipoDocumento?: {
+    IdTipoDocumento: number;
+    Descripcion: string;
+  };
+
+  //data others
+  DigitalFiles?: FileManagerEntity[];
+  TramiteDestinos?: MovimientoEntity[];
+  Anexos?: AnexoEntity[]
+
+  //data usuario externo
+  Nombres: string;
+  ApellidoPaterno: string;
+  ApellidoMaterno: string;
+  Email: string;
+  Celular: string;
+  Direccion: string;
+  NroIdentificacion: string;
+  RUC?: string;
+  RazonSocial?: string;
+  IdTipoUsuario: number;
+  IdRol: string;
+  IdTipoIdentificacion: number;
+  TipoIdentificacion?: {
+    IdTipoIdentificacion: number;
+    Descripcion: string;
+  };
+}
+
+export interface TramiteExternoRecibir2 {
+  //data tramite
+  IdTramite?: number;
+  FechaInicio: Fecha;
+  IdTipoTramite: number;
+  IdEstado: number;
+  IdRemitente: number;
+  Remitente?: {
+    IdUsuario: number,
+    Nombres: string,
+    ApellidoPaterno: string,
+    ApellidoMaterno: string,
+  },
+  IdAreaEmision: number;
+  Area?: {
+    IdArea: number;
+    Descripcion: string;
+  };
+  Activo: boolean;
+  CreadoEl?: Date;
+  CreadoPor?: string;
+
+  //data documento
+  CodigoReferenciaDoc: string;
+  Asunto: string;
+  Observaciones: string;
+  Folios: number;
+  IdTipoDocumento: number;
+  TipoDocumento?: {
+    IdTipoDocumento: number;
+    Descripcion: string;
+  };
+
+  //data others
+  DigitalFiles?: {
+    Id?: number;
+    UrlBase?: string;
+    Url?: string;
+    Nombre?: string;
+    Size?: number;
+    Formato?: string;
+    Titulo: string;
+  }[];
+  TramiteDestinos?: MovimientoEntity[];
+  Anexos?: AnexoEntity[]
+
+  //data usuario externo
+  Nombres: string;
+  ApellidoPaterno: string;
+  ApellidoMaterno: string;
+  Email: string;
+  Celular: string;
+  Direccion: string;
+  NroIdentificacion: string;
+  RUC?: string;
+  RazonSocial?: string;
+  IdTipoUsuario: number;
+  IdRol: string;
+  IdTipoIdentificacion: number;
+  TipoIdentificacion?: {
+    IdTipoIdentificacion: number;
+    Descripcion: string;
+  };
 }
 export interface TramiteUpdate {
-  IdTramite?: number;
-  Descripcion?: string;
-  IdEsquemaTramite?: number;
   Activo?: boolean;
   ModificadoEl?: Date | string;
   ModificadoPor?: string;
@@ -104,7 +544,243 @@ export interface TramiteOut {
   message: Message;
   registro?: TramiteEntity;
 }
+export interface TramitePendienteOut {
+  message: Message;
+  registro?: TramitePendienteEntity;
+}
+export interface TramiteRecibidoOut {
+  message: Message;
+  registro?: TramiteRecibidoEntity[];
+}
+export interface TramiteAtendidoOut {
+  message: Message;
+  // registro?: TramiteAtendidoEntity[];
+  registro?: {
+    IdHistorialMxE: number;
+    FechaHistorialMxE: string;
+    IdDocumento: number,
+    Estado: {
+      IdEstado: number;
+      Descripcion: string;
+    };
+    Movimiento: {
+      IdMovimiento: number;
+    };
+  }[];
+}
+export interface TramiteDesmarcarAtendidoOut {
+  message: Message;
+  // registro?: TramiteAtendidoEntity[];
+  registro?: {
+    IdHistorialMxE: number;
+    FechaHistorialMxE: string;
+    IdDocumento: number,
+    Estado: {
+      IdEstado: number;
+      Descripcion: string;
+    };
+    Movimiento: {
+      IdMovimiento: number;
+    };
+  }
+}
+export interface TramiteDerivadoOut {
+  message: Message;
+  // registro?: TramiteAtendidoEntity[];
+  registro?: {
+    IdHistorialMxE: number;
+    FechaHistorialMxE: string;
+    IdDocumento: number,
+    Estado: {
+      IdEstado: number;
+      Descripcion: string;
+    };
+    Movimiento: {
+      IdMovimiento: number;
+    };
+  }[];
+}
+export interface TramiteDesmarcarDerivadoOut {
+  message: Message;
+  // registro?: TramiteAtendidoEntity[];
+  registro?: {
+    IdHistorialMxE: number;
+    FechaHistorialMxE: string;
+    IdDocumento: number,
+    Estado: {
+      IdEstado: number;
+      Descripcion: string;
+    };
+    Movimiento: {
+      IdMovimiento: number;
+    };
+  }
+}
+
+export interface TramiteDesmarcarRecibidoOut {
+  message: Message;
+  // registro?: TramiteAtendidoEntity[];
+  registro?: {
+    IdHistorialMxE: number;
+    FechaHistorialMxE: string;
+    IdDocumento: number,
+    Estado: {
+      IdEstado: number;
+      Descripcion: string;
+    };
+    Movimiento: {
+      IdMovimiento: number;
+    };
+  }
+}
+export interface TramiteObservadoOut {
+  message: Message;
+  // registro?: TramiteObservadoEntity[];
+  registro?: {
+    IdHistorialMxE: number;
+    FechaHistorialMxE: string;
+    IdDocumento: number,
+    Estado: {
+      IdEstado: number;
+      Descripcion: string;
+    };
+    Movimiento: {
+      IdMovimiento: number;
+    };
+  }[];
+}
+export interface TramiteDesmarcarObservadoOut {
+  message: Message;
+  // registro?: TramiteObservadoEntity[];
+  registro?: {
+    IdHistorialMxE: number;
+    FechaHistorialMxE: string;
+    IdDocumento: number,
+    Estado: {
+      IdEstado: number;
+      Descripcion: string;
+    };
+    Movimiento: {
+      IdMovimiento: number;
+    };
+  }
+}
+export interface TramiteArchivadoOut {
+  message: Message;
+  // registro?: TramiteArchivadoEntity[];
+  registro?: {
+    IdHistorialMxE: number;
+    FechaHistorialMxE: string;
+    IdDocumento: number,
+    Estado: {
+      IdEstado: number;
+      Descripcion: string;
+    };
+    Movimiento: {
+      IdMovimiento: number;
+    };
+  }[];
+}
+export interface TramiteDesmarcarArchivadoOut {
+  message: Message;
+  // registro?: TramiteArchivadoEntity[];
+  registro?: {
+    IdHistorialMxE: number;
+    FechaHistorialMxE: string;
+    IdDocumento: number,
+    Estado: {
+      IdEstado: number;
+      Descripcion: string;
+    };
+    Movimiento: {
+      IdMovimiento: number;
+    };
+  }
+}
 export interface TramitesOut {
   message: Message;
   registro?: TramiteEntity[];
 }
+export interface TramitesPendientesOut {
+  message: Message;
+  registro?: TramitePendienteEntity[];
+}
+export interface TramitesRecibidosOut {
+  message: Message;
+  registro?: TramiteRecibidoEntity[];
+}
+export interface GetAllTramitePendiente {
+  IdAreaDestino: number;
+}
+export interface GetAllTramiteRecibido {
+  IdAreaDestino: number;
+}
+export interface TramiteRecibir {
+  Movimientos: {
+    IdEstado?: number
+    IdMovimiento: number
+    Observaciones?: string
+    FechaHistorialMxE?: Date
+    Activo?: boolean
+    CreadoPor?: string
+    CreadoEl?: Date
+  }[];
+  Observaciones: string;
+}
+export interface TramiteDesmarcarRecibir {
+  IdMovimiento: number
+}
+export interface TramiteAtender {
+  Movimientos: {
+    IdEstado?: number
+    IdMovimiento: number
+    Observaciones?: string
+    FechaHistorialMxE?: Date
+    Activo?: boolean
+    CreadoPor?: string
+    CreadoEl?: Date
+  }[];
+  Observaciones: string;
+}
+export interface TramiteDesmarcarAtender {
+  IdMovimiento: number
+}
+export interface TramiteObservar {
+  Movimientos: {
+    IdEstado?: number
+    IdMovimiento: number
+    Observaciones?: string
+    FechaHistorialMxE?: Date
+    Activo?: boolean
+    CreadoPor?: string
+    CreadoEl?: Date
+  }[];
+  Observaciones: string;
+}
+export interface TramiteDesmarcarObservar {
+  IdMovimiento: number
+}
+export interface TramiteArchivar {
+  Movimientos: {
+    IdTramite: number;
+    IdEstado?: number
+    IdMovimiento: number
+    Observaciones?: string
+    FechaHistorialMxE?: Date
+    Activo?: boolean
+    CreadoPor?: string
+    CreadoEl?: Date
+  }[];
+  Detalle: string;
+  IdArchivador: number;
+}
+export interface TramiteDesmarcarArchivar {
+  IdMovimiento: number
+}
+export interface TramiteAtenderWithDocumento {
+
+
+}
+
+
+
