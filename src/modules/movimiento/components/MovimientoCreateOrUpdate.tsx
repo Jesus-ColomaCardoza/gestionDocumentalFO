@@ -73,7 +73,8 @@ const MovimientoCreateOrUpdate = (props: MovimientoCreateOrUpdateProps) => {
       // uploadButton,
       cancelButton,
     } = options;
-    const value = props.totalSizeFilesUpload / 20000;
+    const porcetage = (props.totalSizeFilesUpload / (20 * 1024 * 1024)) * 100; //20MB
+
     const formatedValue =
       fileUpload && fileUpload.current
         ? fileUpload.current.formatSize(props.totalSizeFilesUpload)
@@ -92,9 +93,9 @@ const MovimientoCreateOrUpdate = (props: MovimientoCreateOrUpdateProps) => {
         {/* {uploadButton} */}
         {cancelButton}
         <div className="flex align-items-center gap-3 ml-auto">
-          <span>{formatedValue} / 2 MB</span>
+          <span>{formatedValue} / 20MB</span>
           <ProgressBar
-            value={value}
+            value={porcetage}
             showValue={false}
             style={{ width: "10rem", height: "12px" }}
           ></ProgressBar>

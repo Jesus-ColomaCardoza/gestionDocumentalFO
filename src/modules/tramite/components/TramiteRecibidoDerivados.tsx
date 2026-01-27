@@ -118,121 +118,6 @@ const TramiteRecibidoDerivados = () => {
   const [selectedAnexos, setSelectedAnexos] = useState<File[]>([]);
 
   //functions
-  const createTramiteEmitido = async () => {
-    setSubmitted(true);
-    if (
-      tramite.Asunto.trim() &&
-      tramite.IdTipoDocumento != 0 &&
-      tramite.CodigoReferencia.trim() &&
-      tramite.IdRemitente != 0 &&
-      tramite.Folios != 0
-    ) {
-      // setLoadingTramiteCreateOrUpdate(true);
-      let arrayAnexosUpload: AnexoEntity[] = [];
-
-      //1 we create anexos physical files
-      const uploadResults = await Promise.all(
-        Array.from(selectedAnexos).map(async (anexo) => {
-          const formData = new FormData();
-
-          formData.append("file", anexo);
-
-          const anexoUpload = await createFile(formData);
-
-          if (anexoUpload?.message?.msgId === 0) {
-            const data = {
-              Titulo: anexoUpload.registro?.parseoriginalname!,
-              FormatoAnexo: anexoUpload.registro?.mimetype,
-              NombreAnexo: anexoUpload.registro?.filename,
-              UrlAnexo: anexoUpload.registro?.url!,
-              SizeAnexo: anexoUpload.registro?.size,
-              UrlBase: anexoUpload.registro?.path,
-              IdTramite: 0,
-              Activo: true,
-            };
-
-            arrayAnexosUpload.push(data);
-
-            return {
-              success: true,
-              data: data,
-            };
-          } else {
-            return {
-              success: false,
-              error: anexoUpload?.message?.msgTxt || "Error desconocido",
-            };
-          }
-        })
-      );
-
-      // const successfulUploads = uploadResults
-      //   .filter((r) => r.success)
-      //   .map((r) => r.data);
-
-      const failedUploads = uploadResults.filter((r) => !r.success);
-
-      if (failedUploads.length > 0) {
-        toast.current?.show({
-          severity: "error",
-          detail: "No se pudieron cargar todos los anexos.",
-          life: 3000,
-        });
-        return;
-      }
-
-      //2 we create tramite
-      let tramiteCreateEmitido = await createEmitido({
-        CodigoReferencia: tramite.CodigoReferencia,
-        Asunto: tramite.Asunto,
-        // Descripcion: tramite.Descripcion,
-        Observaciones: tramite.Observaciones,
-        FechaInicio: new Date().toISOString(),
-        // FechaFin:tramite.FechaFin,
-        Folios: tramite.Folios,
-
-        IdTipoTramite: tramite.IdTipoTramite || 1, // IdTipoTramite - 1 - interno
-
-        IdTipoDocumento: tramite.IdTipoDocumento,
-        IdAreaEmision: tramite.IdAreaEmision,
-        IdEstado: tramite.IdEstado || 1, // IdTipoTramite - 1 - ver estado nuevo o algo asi
-        IdRemitente: tramite.IdRemitente,
-        Activo: tramite.Activo,
-
-        DigitalFiles: selectedDigitalFiles,
-        TramiteDestinos: selectedTramiteDestinos,
-        Anexos: arrayAnexosUpload,
-      });
-
-      // setLoadingTramiteCreateOrUpdate(false);
-
-      if (
-        tramiteCreateEmitido?.message.msgId == 0 &&
-        tramiteCreateEmitido.registro
-      ) {
-        setTramites([...tramites, tramiteCreateEmitido.registro]);
-
-        navigate("../tramite/emitido");
-
-        toast.current?.show({
-          severity: "success",
-          detail: `${tramiteCreateEmitido.message.msgTxt}`,
-          life: 3000,
-        });
-      } else if (tramiteCreateEmitido?.message.msgId == 1) {
-        toast.current?.show({
-          severity: "error",
-          detail: `${tramiteCreateEmitido.message.msgTxt}`,
-          life: 3000,
-        });
-      }
-
-      // setSelectedAnexos([])
-      // setFileManagerDialog(false);
-      // setTramite(emptyTramite);
-    }
-  };
-
   // actions CRUD - Esquema TipoDocumento (create, read, update, remove) -> (create, findAll-findOne, update, remove)
   const findAllTipoDocumentoCombox = async () => {
     setLoading(true);
@@ -338,7 +223,7 @@ const TramiteRecibidoDerivados = () => {
       if (invalidFiles.length > 0) {
         toast.current?.show({
           severity: "warn",
-          detail: `El archivo "${invalidFiles[0].name}" supera el límite de 2MB.`,
+          detail: `El archivo "${invalidFiles[0].name}" supera el límite de 20MB.`,
           life: 3000,
         });
 
@@ -424,7 +309,7 @@ const TramiteRecibidoDerivados = () => {
       if (invalidFiles.length > 0) {
         toast.current?.show({
           severity: "warn",
-          detail: `El archivo "${invalidFiles[0].name}" supera el límite de 2MB.`,
+          detail: `El archivo "${invalidFiles[0].name}" supera el límite de 20MB.`,
           life: 3000,
         });
 
@@ -608,38 +493,6 @@ const TramiteRecibidoDerivados = () => {
     setMovimiento(_movimiento);
   };
 
-  const validateForm = () => {
-    let fieldErrors: any = {};
-
-    if (!tramite.Asunto.trim()) {
-      fieldErrors.Asunto = "Asunto es obligatorio.";
-    }
-
-    if (tramite.IdTipoDocumento == 0) {
-      fieldErrors.IdTipoDocumento = "Tipo de documento es obligatorio.";
-    }
-
-    if (!tramite.CodigoReferencia.trim()) {
-      fieldErrors.CodigoReferencia = "Codigo de referencia es obligatoria.";
-    }
-
-    if (tramite.IdRemitente == 0) {
-      fieldErrors.IdRemitente = "Remitente es obligatorio.";
-    }
-
-    if (tramite.Folios == 0) {
-      fieldErrors.Folios = "Folios es obligatorio.";
-    }
-
-    if (tramite.IdAreaEmision == 0) {
-      fieldErrors.IdAreaEmision = "Área de emisión es obligatoria.";
-    }
-
-    setTramiteErrors(fieldErrors);
-
-    return Object.keys(fieldErrors).length === 0;
-  };
-
   //useEffects
   useEffect(() => {
     findAllTipoDocumentoCombox();
@@ -698,7 +551,7 @@ const TramiteRecibidoDerivados = () => {
                   <div className="p-inputgroup">
                     <InputText
                       id="CodigoReferencia"
-                      value={tramite.CodigoReferencia}
+                      value={tramite.CodigoReferenciaTram}
                       onChange={(e) => {
                         onInputTextChange(e, "CodigoReferencia");
                       }}
@@ -729,7 +582,7 @@ const TramiteRecibidoDerivados = () => {
                   <div className="p-inputgroup">
                     <InputText
                       id="CodigoReferencia"
-                      value={tramite.CodigoReferencia}
+                      value={tramite.CodigoReferenciaTram}
                       onChange={(e) => {
                         onInputTextChange(e, "CodigoReferencia");
                       }}
@@ -757,7 +610,7 @@ const TramiteRecibidoDerivados = () => {
                 <div className="p-inputgroup">
                   <InputText
                     id="CodigoReferencia"
-                    value={tramite.CodigoReferencia}
+                    value={tramite.CodigoReferenciaTram}
                     onChange={(e) => {
                       onInputTextChange(e, "CodigoReferencia");
                     }}
@@ -784,7 +637,7 @@ const TramiteRecibidoDerivados = () => {
                 <div className="p-inputgroup">
                   <InputText
                     id="CodigoReferencia"
-                    value={tramite.CodigoReferencia}
+                    value={tramite.CodigoReferenciaTram}
                     onChange={(e) => {
                       onInputTextChange(e, "CodigoReferencia");
                     }}

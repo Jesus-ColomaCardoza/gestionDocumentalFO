@@ -555,7 +555,7 @@ const TramiteRecibidoExterno = () => {
       if (invalidFiles.length > 0) {
         toast.current?.show({
           severity: "warn",
-          detail: `El archivo "${invalidFiles[0].name}" supera el límite de 2MB.`,
+          detail: `El archivo "${invalidFiles[0].name}" supera el límite de 20MB.`,
           life: 3000,
         });
 
@@ -591,7 +591,7 @@ const TramiteRecibidoExterno = () => {
       if (invalidFiles.length > 0) {
         toast.current?.show({
           severity: "warn",
-          detail: `El archivo "${invalidFiles[0].name}" supera el límite de 2MB.`,
+          detail: `El archivo "${invalidFiles[0].name}" supera el límite de 20MB.`,
           life: 3000,
         });
 

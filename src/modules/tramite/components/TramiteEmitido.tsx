@@ -89,51 +89,51 @@ const TramiteEmitido = () => {
   );
 
   // actions CRUD - Tramite (create, read, update, remove) -> (create, findAll-findOne, update, remove)
-  const findAllTramite = async () => {
-    setLoading(true);
-    const tramitesFindAll = await findAll();
-    setLoading(false);
+  // const findAllTramite = async () => {
+  //   setLoading(true);
+  //   const tramitesFindAll = await findAll();
+  //   setLoading(false);
 
-    if (tramitesFindAll?.message.msgId == 0 && tramitesFindAll.registro) {
-      //gg
-      setTramites(
-        Array.isArray(tramitesFindAll.registro)
-          ? tramitesFindAll.registro?.map((af) => {
-              return {
-                ...af,
-                FechaInicio: af.FechaInicio ? new Date(af.FechaInicio) : null,
-                Detalle:
-                  af.TipoDocumento?.Descripcion ||
-                  "" +
-                    " " +
-                    af.CodigoReferencia +
-                    " " +
-                    af.Folios +
-                    " " +
-                    af.Asunto,
-                Remitente: {
-                  ...af.Remitente,
-                  NombreCompleto:
-                    af.Remitente?.Nombres ||
-                    "" + " " + af.Remitente?.ApellidoPaterno ||
-                    "" + " " + af.Remitente?.ApellidoMaterno ||
-                    "",
-                },
-                Destinos:
-                  (af.Movimiento?.length || 0) > 1
-                    ? `Múltiples destinos(${af.Movimiento?.length})`
-                    : af.Movimiento?.[0]
-                    ? af.Movimiento[0].AreaDestino.Descripcion
-                    : "Sin destino",
-              };
-            })
-          : []
-      );
-    }
+  //   if (tramitesFindAll?.message.msgId == 0 && tramitesFindAll.registro) {
+  //     //gg
+  //     setTramites(
+  //       Array.isArray(tramitesFindAll.registro)
+  //         ? tramitesFindAll.registro?.map((af) => {
+  //             return {
+  //               ...af,
+  //               FechaInicio: af.FechaInicio ? new Date(af.FechaInicio) : null,
+  //               Detalle:
+  //                 af.TipoDocumento?.Descripcion ||
+  //                 "" +
+  //                   " " +
+  //                   af.CodigoReferencia +
+  //                   " " +
+  //                   af.Folios +
+  //                   " " +
+  //                   af.Asunto,
+  //               Remitente: {
+  //                 ...af.Remitente,
+  //                 NombreCompleto:
+  //                   af.Remitente?.Nombres ||
+  //                   "" + " " + af.Remitente?.ApellidoPaterno ||
+  //                   "" + " " + af.Remitente?.ApellidoMaterno ||
+  //                   "",
+  //               },
+  //               Destinos:
+  //                 (af.Movimiento?.length || 0) > 1
+  //                   ? `Múltiples destinos(${af.Movimiento?.length})`
+  //                   : af.Movimiento?.[0]
+  //                   ? af.Movimiento[0].AreaDestino.Descripcion
+  //                   : "Sin destino",
+  //             };
+  //           })
+  //         : []
+  //     );
+  //   }
 
-    setLoading(false);
-    onGlobalFilterChange();
-  };
+  //   setLoading(false);
+  //   onGlobalFilterChange();
+  // };
 
   // actions CRUD - Area (create, read, update, remove) -> (create, findAll-findOne, update, remove)
   const findAllAreaCombox = async () => {
@@ -276,7 +276,7 @@ const TramiteEmitido = () => {
           type="button"
           icon="pi pi-refresh"
           severity="info"
-          onClick={findAllTramite}
+          // onClick={findAllTramite}
           style={{
             width: "2rem",
             height: "2rem",
@@ -343,24 +343,7 @@ const TramiteEmitido = () => {
   };
 
   // templates to column detalle
-  const detalleBodyTemplate = (rowData: TramiteEntity) => {
-    return (
-      <div className="flex flex-column gap-2">
-        <p className="text-sm m-0">
-          {rowData.TipoDocumento?.Descripcion.substring(0, 3) ||
-            "Doc" +
-              ". " +
-              rowData?.CodigoReferencia +
-              " [" +
-              rowData.Folios +
-              " Folio(s)]"}
-        </p>
-        <span className="text-xs text-color-secondary m-0">
-          {rowData.Asunto}
-        </span>
-      </div>
-    );
-  };
+
 
   // templates to column Usuario
   const remitenteBodyTemplate = (rowData: TramiteEntity) => {
@@ -491,7 +474,7 @@ const TramiteEmitido = () => {
 
   //useEffects
   useEffect(() => {
-    findAllTramite();
+    // findAllTramite();
     findAllAreaCombox();
   }, []);
 
@@ -560,7 +543,7 @@ const TramiteEmitido = () => {
                 style={{ width: col.width, padding: 5 }}
                 filter
                 filterPlaceholder={col.filterPlaceholder}
-                body={detalleBodyTemplate}
+                // body={detalleBodyTemplate}
               />
             );
           } else if (col.field == "IdTramite") {

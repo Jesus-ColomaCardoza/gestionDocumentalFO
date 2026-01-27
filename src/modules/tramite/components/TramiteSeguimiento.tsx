@@ -4,18 +4,31 @@ import { Toast } from "primereact/toast";
 import { useTheme } from "../../../ThemeContext";
 import { Tooltip } from "primereact/tooltip";
 import { useAuth } from "../../auth/context/AuthContext";
-import { formatFileSize } from "../../utils/Methods";
-import { useNavigate } from "react-router-dom";
+import { formatDate } from "../../utils/Methods";
+import { useNavigate, useParams } from "react-router-dom";
 import { Tag } from "primereact/tag";
 import { OrganizationChart } from "primereact/organizationchart";
 import { TreeNode } from "primereact/treenode";
+import UseMovimiento from "../../movimiento/hooks/UseMovimiento";
+import {
+  MovimientoNode,
+  MovimientoSeguimientoEntity,
+} from "../../movimiento/interfaces/MovimientoInterface";
+import { Avatar } from "primereact/avatar";
 
 const TramiteSeguimiento = () => {
   // custom hooks
   const { themePrimeFlex } = useTheme();
 
+  const authContext = useAuth();
+
+  const userAuth = authContext?.userAuth;
 
   const navigate = useNavigate();
+
+  const { findOneSeguimiento } = UseMovimiento();
+
+  const params = useParams();
 
   //useRefs
   const toast = useRef<Toast>(null);
@@ -29,11 +42,361 @@ const TramiteSeguimiento = () => {
   const dragStart = useRef({ x: 0, y: 0 });
 
   //useStates
+  const [loading, setLoading] = useState<boolean>(true);
+
   const [transform, setTransform] = useState({ scale: 1, x: 0, y: 0 });
 
-  const [selectedAnexos, setSelectedAnexos] = useState<File[]>([]);
+  const [moviminetoSeguimiento, setMoviminetoSeguimiento] =
+    useState<MovimientoSeguimientoEntity>();
 
   //functions
+  const nodeTemplate2 = (node: OrgNode) => {
+    let iconEstatdo = "";
+
+    switch (node.data?.HistorialMovimientoxEstado?.[0]?.Estado.IdEstado) {
+      case 15:
+        iconEstatdo = "pi pi-clock";
+        break;
+      case 16:
+        iconEstatdo = "pi pi-book";
+        break;
+      case 17:
+        iconEstatdo = "pi pi-file-plus";
+        break;
+      case 18:
+        iconEstatdo = "pi pi-calendar-clock";
+        break;
+      case 19:
+        iconEstatdo = "pi pi-trash";
+        break;
+      case 20:
+        iconEstatdo = "pi pi-info-circle";
+        break;
+      default:
+        iconEstatdo = "pi pi-clock";
+        break;
+    }
+
+    if (node.type === "movimiento") {
+      return (
+        <div
+          className="flex flex-column p-2 pb-3"
+          style={{
+            width: "17em",
+            background: themePrimeFlex === "dark" ? "#1f1f2cff" : "#ffffffde",
+            border:
+              themePrimeFlex === "dark"
+                ? "1px solid #1f1f2cff"
+                : "1px solid #f5f5f5de",
+            borderRadius: "10px",
+          }}
+        >
+          <div className="flex flex-row justify-content-between align-items-center my-2">
+            <div
+              className="flex flex-column justify-content-start align-items-start"
+              style={{ width: "70%" }}
+            >
+              <span className="text-xs">Enviado</span>
+              <span style={{ textAlign: "left" }} className="text-xs">
+                {node?.data?.FechaMovimiento
+                  ? formatDate(new Date(node.data.FechaMovimiento))
+                  : "--:--:--"}
+              </span>
+              <span className="text-xs">
+                {node?.data?.Documento?.CodigoReferenciaDoc ?? "Sin código"}
+              </span>
+            </div>
+            <div style={{ width: "20%" }}>
+              <Avatar
+                label={`${
+                  ((node?.data?.NombreResponsable || "SR")
+                    .split(" ")[0][0]
+                    ?.toUpperCase() || "") +
+                  "" +
+                  ((node?.data?.NombreResponsable || "Sin responsable")
+                    .split(" ")[1][0]
+                    ?.toUpperCase() || "SR")
+                }`}
+                image={`${""}`}
+                shape="circle"
+              />
+            </div>
+          </div>
+          <div className="flex flex-row  justify-content-between align-items-center border-top-1 border-bottom-1 border-gray-600 py-2">
+            <div style={{ width: "20%" }}>
+              <Avatar
+                icon={iconEstatdo}
+                shape="circle"
+                style={{
+                  color:
+                    themePrimeFlex === "dark"
+                      ? "rgba(106, 123, 216, 1)"
+                      : "rgba(43, 71, 230, 1)",
+                }}
+              />
+            </div>
+            <div
+              className="flex flex-column justify-content-start align-items-start"
+              style={{ width: "75%" }}
+            >
+              <span className="text-xs">
+                {node?.data?.NombreResponsable || "Sin responsable"}
+              </span>
+              <span style={{ textAlign: "left" }} className="text-sm font-bold">
+                {node?.data?.AreaDestino?.Descripcion || "Sin área destino"}
+              </span>
+            </div>
+          </div>
+
+          {node.data?.HistorialMovimientoxEstado?.map((HxM, index) => {
+            if (HxM?.Estado?.IdEstado === 15 || HxM?.Estado?.IdEstado === 17) {
+              return null;
+            }
+            return (
+              <div
+                key={`historial-${HxM.IdHistorialMxE || index}`}
+                className="flex flex-row justify-content-between align-items-center my-2"
+              >
+                <div
+                  className="flex flex-column justify-content-start align-items-start"
+                  style={{ width: "100%" }}
+                >
+                  <span className="text-xs">{HxM?.Estado?.Descripcion}</span>
+                  {HxM?.Observaciones && HxM?.Observaciones !== "" && (
+                    <span className="text-xs">{HxM?.Observaciones ?? ""}</span>
+                  )}
+                  {HxM?.Detalle && HxM?.Detalle !== "" && (
+                    <span className="text-xs">{HxM?.Detalle ?? ""}</span>
+                  )}
+                  <span style={{ textAlign: "left" }} className="text-xs">
+                    {HxM.FechaHistorialMxE
+                      ? formatDate(new Date(HxM.FechaHistorialMxE))
+                      : "--:--:--"}
+                  </span>
+                </div>
+                {/* <div style={{ width: "20%" }}>
+                  <Avatar
+                    label={`${
+                      userAuth?.Nombres.split(" ")[0][0].toUpperCase() +
+                      "" +
+                      userAuth?.ApellidoPaterno.split(" ")[0][0].toUpperCase()
+                    }`}
+                    image={`${userAuth?.UrlFotoPerfil}`}
+                    shape="circle"
+                  />
+                </div> */}
+              </div>
+            );
+          })}
+        </div>
+      );
+    } else if (node.type === "tramite") {
+      return (
+        <div
+          className="flex flex-column p-2 pb-3"
+          style={{
+            width: "17em",
+            background: themePrimeFlex === "dark" ? "#1f1f2cff" : "#ffffffde",
+            border:
+              themePrimeFlex === "dark"
+                ? "1px solid #1f1f2cff"
+                : "1px solid #f5f5f5de",
+            borderRadius: "10px",
+          }}
+        >
+          <div className="flex flex-row  justify-content-between align-items-center border-bottom-1 border-gray-600 py-2">
+            <div style={{ width: "20%" }}>
+              <Avatar
+                icon={
+                  node?.data?.Tramite?.TipoTramite?.IdTipoTramite === 1
+                    ? // interno
+                      "pi pi-building"
+                    : // externo
+                      "pi pi-globe"
+                }
+                shape="circle"
+                style={{
+                  color:
+                    themePrimeFlex === "dark"
+                      ? "rgba(106, 123, 216, 1)"
+                      : "rgba(43, 71, 230, 1)",
+                }}
+              />
+            </div>
+            <div
+              className="flex flex-column justify-content-start align-items-start"
+              style={{ width: "75%" }}
+            >
+              {node?.data?.Tramite?.TipoTramite?.IdTipoTramite === 1 ? (
+                // interno
+                // área de origen
+                <>
+                  <span style={{ textAlign: "left" }} className="text-xs">
+                    {node?.data?.Tramite?.Remitente?.Nombres +
+                      " " +
+                      node?.data?.Tramite?.Remitente?.ApellidoPaterno +
+                      " " +
+                      node?.data?.Tramite?.Remitente?.ApellidoMaterno ||
+                      "Sin remitente" ||
+                      ""}
+                  </span>
+                  <span
+                    style={{ textAlign: "left" }}
+                    className="text-sm font-bold"
+                  >
+                    {node?.data?.Tramite?.Area?.Descripcion ||
+                      "Sin área destino"}
+                  </span>
+                </>
+              ) : (
+                // externo
+                <>
+                  {/* documento de identificacion */}
+                  <span
+                    style={{ textAlign: "left" }}
+                    className="text-sm font-bold"
+                  >
+                    {node?.data?.Tramite?.Remitente?.NroIdentificacion ||
+                      "Sin Nro. Identificación"}
+                  </span>
+                  {/* usuario */}
+                  <span className="text-xs">
+                    {`${
+                      node?.data?.Tramite?.Remitente?.Nombres +
+                      " " +
+                      node?.data?.Tramite?.Remitente?.ApellidoPaterno +
+                      " " +
+                      node?.data?.Tramite?.Remitente?.ApellidoMaterno
+                    }` || "Sin remitente"}
+                  </span>
+                </>
+              )}
+            </div>
+          </div>
+
+          {node?.data?.Tramite?.TipoTramite?.IdTipoTramite === 1 ? (
+            // interno
+            <></>
+          ) : (
+            // externo
+            <div className="flex flex-row justify-content-between align-items-center border-bottom-1 border-gray-600 py-2 ">
+              <div
+                className="flex flex-column justify-content-start align-items-start"
+                style={{ width: "70%" }}
+              >
+                <span className="text-xs">
+                  {node?.data?.Tramite?.Remitente?.Email}
+                </span>
+                {/* <span style={{ textAlign: "left" }} className="text-xs">
+                {node?.data?.Tramite?.FechaInicio
+                  ? formatDate(new Date(node?.data?.Tramite?.FechaInicio))
+                  : "--:--:--"}
+              </span> */}
+              </div>
+            </div>
+          )}
+
+          <div className="flex flex-row justify-content-between align-items-center my-2">
+            <div
+              className="flex flex-column justify-content-start align-items-start"
+              style={{ width: "70%" }}
+            >
+              <span className="text-xs">Inicio trámite</span>
+              <span style={{ textAlign: "left" }} className="text-xs">
+                {node?.data?.Tramite?.FechaInicio
+                  ? formatDate(new Date(node?.data?.Tramite?.FechaInicio))
+                  : "--:--:--"}
+              </span>
+            </div>
+            <div style={{ width: "20%" }}>
+              <Avatar
+                label={`${
+                  node?.data?.Tramite?.Remitente?.Nombres?.split(
+                    " ",
+                  )[0][0]?.toUpperCase() +
+                  "" +
+                  (node?.data?.Tramite?.Remitente?.ApellidoPaterno?.split(
+                    " ",
+                  )[0][0]?.toUpperCase() || "SR")
+                }`}
+                image={`${""}`}
+                shape="circle"
+              />
+            </div>
+          </div>
+        </div>
+      );
+    }
+    return node.label;
+  };
+
+  interface OrgNode extends TreeNode {
+    data?: MovimientoNode;
+    type?: string;
+  }
+
+  const [treeMovimientos, setTreeMovimientos] = useState<OrgNode[]>([]);
+
+  function mapToOrgNodes(movimientos: MovimientoNode[]): OrgNode[] {
+    return movimientos
+      .filter((mov) => !!mov) // evita nulls directos
+      .map((mov) => {
+        const nodo: OrgNode = {
+          key: mov.IdMovimiento?.toString() ?? crypto.randomUUID(),
+          label: "movimiento",
+          type: "movimiento",
+          expanded: true,
+          // className: "bg-indigo-500 text-white",
+          className: "p-0",
+          style: { borderRadius: "12px" },
+          data: { ...mov },
+          children: Array.isArray(mov.Children)
+            ? mapToOrgNodes(mov.Children)
+            : [],
+        };
+
+        return nodo;
+      });
+  }
+
+  const findOneSeguimientoMovimiento = async () => {
+    setLoading(true);
+
+    const movimiento = await findOneSeguimiento({
+      IdTramite: parseInt(params.id ?? "66") || 0,
+      IdMovimiento: parseInt(params.id2 ?? "105") || 0,
+    });
+
+    setLoading(false);
+
+    if (movimiento?.message.msgId == 0 && movimiento.registro) {
+      const roots = mapToOrgNodes(movimiento.registro.Seguimiento);
+
+      const rootNode: OrgNode = {
+        key: movimiento.registro.Tramite.IdTramite.toString(),
+        label: "tramite",
+        type: "tramite",
+        expanded: true,
+        className: "p-0",
+        style: { borderRadius: "12px" },
+        data: {
+          Tramite: {
+            IdTramite: movimiento.registro.Tramite.IdTramite,
+            Area: movimiento.registro.Tramite.Area,
+            FechaInicio: movimiento.registro.Tramite.FechaInicio,
+            TipoTramite: movimiento.registro.Tramite.TipoTramite,
+            Remitente: movimiento.registro.Tramite.Remitente,
+          },
+        },
+        children: roots,
+      };
+
+      setTreeMovimientos([rootNode]);
+
+      setMoviminetoSeguimiento(movimiento.registro);
+    }
+  };
+
   const handleMouseDown = (e: React.MouseEvent) => {
     isDragging.current = true;
     dragStart.current = { x: e.clientX, y: e.clientY };
@@ -53,26 +416,6 @@ const TramiteSeguimiento = () => {
 
   const handleMouseUp = () => {
     isDragging.current = false;
-  };
-
-  const nodeTemplate = (node: TreeNode) => {
-    if (node.label === "person") {
-      return (
-        <div className="flex flex-column">
-          <div className="flex flex-column align-items-center">
-            <img
-              alt={node.data.name}
-              src={node.data.image}
-              className="mb-3 w-3rem h-3rem"
-            />
-            <span className="font-bold mb-2">{node.data.name}</span>
-            <span>{node.data.title}</span>
-          </div>
-        </div>
-      );
-    }
-
-    return node.label;
   };
 
   //useEffects
@@ -97,7 +440,11 @@ const TramiteSeguimiento = () => {
     };
   }, [transform.scale]);
 
-  useEffect(() => {}, []);
+  useEffect(() => {
+    if (params?.id && params?.id2) {
+      findOneSeguimientoMovimiento();
+    }
+  }, []);
 
   const [data] = useState<TreeNode[]>([
     {
@@ -221,14 +568,14 @@ const TramiteSeguimiento = () => {
         style={{ height: "70vh" }}
       >
         <div
-          className="flex flex-column justify-content-between border-solid border-1 border-gray-500 border-round-md"
+          className="flex flex-column border-solid border-1 border-gray-500 border-round-md"
           style={{ width: "24%" }}
         >
           <div className="flex flex-column">
             <div className="flex flex-row justify-content-between align-items-center py-3 px-3 border-bottom-1 border-gray-500">
               <label
                 htmlFor="ApellidoPaterno"
-                className="block text-900 font-medium"
+                className="block text-900 text-md font-bold"
                 style={{
                   width: "30%",
                 }}
@@ -239,7 +586,8 @@ const TramiteSeguimiento = () => {
               <Button
                 type="button"
                 onClick={() => {
-                  anexosRef.current?.click();
+                  // anexosRef.current?.click();
+                  window.print();
                 }}
                 size="small"
                 severity="contrast"
@@ -267,24 +615,26 @@ const TramiteSeguimiento = () => {
               />
             </div>
 
-            {/* <div className="flex flex-row py-1 px-4" style={{ gap: "1rem" }}>
+            <div
+              className="flex flex-row pt-3 pb-1 px-3"
+              style={{ gap: "1rem" }}
+            >
               <div
                 style={{
                   width: "100%",
                 }}
               >
-                <label
-                  className="block text-900 text-sm font-medium mb-2"
-                >
-                  Archivo digital
+                <label className="block text-900 text-sm font-bold mb-2">
+                  Código de trámite
                 </label>
-                <span
-                  className="block text-900 text-xs  mb-2"
-                >
-                  Archivo digital
+                <span className="block text-900 text-xs mb-2">
+                  {moviminetoSeguimiento?.Tramite?.IdTramite.toString().padStart(
+                    8,
+                    "0",
+                  )}
                 </span>
               </div>
-            </div> */}
+            </div>
 
             <div className="flex flex-row py-1 px-3" style={{ gap: "1rem" }}>
               <div
@@ -292,11 +642,12 @@ const TramiteSeguimiento = () => {
                   width: "100%",
                 }}
               >
-                <label className="block text-900 text-sm font-medium mb-2">
+                <label className="block text-900 text-sm font-bold mb-2">
                   Origen
                 </label>
                 <span className="block text-900 text-xs mb-2">
-                  Archivo digital
+                  {moviminetoSeguimiento?.Tramite?.TipoTramite?.Descripcion ||
+                    "Externo"}
                 </span>
               </div>
             </div>
@@ -307,22 +658,25 @@ const TramiteSeguimiento = () => {
                   width: "100%",
                 }}
               >
-                <label className="block text-900 text-sm font-medium mb-2">
+                <label className="block text-900 text-sm font-bold mb-2">
                   Asunto
                 </label>
                 <span className="block text-900 text-xs mb-2">
-                  Archivo digital
+                  {moviminetoSeguimiento?.Movimiento?.Asunto || "Sin Asunto"}
                 </span>
               </div>
             </div>
 
-            <div className="flex flex-row py-1 px-3" style={{ gap: "1rem" }}>
+            <div
+              className="flex flex-row pt-1 pb-3 px-3"
+              style={{ gap: "1rem" }}
+            >
               <div
                 style={{
                   width: "100%",
                 }}
               >
-                <label className="block text-900 text-sm font-medium mb-2">
+                <label className="block text-900 text-sm font-bold mb-2">
                   Estado
                 </label>
 
@@ -336,9 +690,9 @@ const TramiteSeguimiento = () => {
           </div>
 
           <div className="flex flex-column border-top-1 border-gray-500">
-            <div className="flex flex-row align-items-center pt-3 px-4 ">
+            <div className="flex flex-row align-items-center pt-3 px-3 ">
               <label
-                className="block text-900 font-medium"
+                className="block text-900 text-sm font-bold"
                 style={{
                   width: "30%",
                 }}
@@ -360,10 +714,10 @@ const TramiteSeguimiento = () => {
                   minHeight: "3rem",
                 }}
               >
-                {selectedAnexos.map((anexo) => {
+                {moviminetoSeguimiento?.Documentos.map((doc) => {
                   return (
                     <div
-                      key={anexo.lastModified}
+                      key={doc.Documento.IdDocumento}
                       className="flex flex-row justify-content-between p-2"
                       style={{
                         gap: "1rem",
@@ -375,36 +729,64 @@ const TramiteSeguimiento = () => {
                     >
                       <div className="flex flex-row gap-2">
                         {/* icon */}
-                        <div className="flex align-items-center justify-content-center pr-2">
+                        {/* <div className="flex align-items-center justify-content-center pr-2">
                           <i
                             className="pi pi-file-pdf"
                             style={{ color: "#559", fontSize: "1.5rem" }}
                           ></i>
+                        </div> */}
+                        <div
+                          className="flex align-items-center justify-content-center text-center border-round-md mr-2"
+                          style={{
+                            background:
+                              themePrimeFlex === "light" ? "#eee" : "#333",
+                          }}
+                        >
+                          <i
+                            className="pi pi-file-pdf px-3 py-2 "
+                            style={{
+                              color:
+                                themePrimeFlex === "light"
+                                  ? "rgba(75, 75, 165, 1)"
+                                  : "rgba(121, 121, 179, 1)",
+                              fontSize: "1.3rem",
+                            }}
+                          ></i>
                         </div>
                         {/* descripcion */}
-                        <div className="flex flex-column gap-2">
+                        <div className="flex flex-column">
                           <a
-                            className="hover:underline hover:text-blue-300 text-xs"
+                            className="hover:underline hover:text-blue-300 text-sm font-bold"
                             style={{
                               textDecoration: "none",
                               color: "var(--text-color)",
                             }}
-                            href={`${URL.createObjectURL(anexo)}`}
+                            // href={`${doc.Documento.UrlDocumento}`}
+                            // href={`${URL.createObjectURL(doc)}`}
                             onClick={() => {
-                              const url = URL.createObjectURL(anexo);
-                              console.log(url);
+                              navigate(
+                                `../tramite/documento/${doc?.Documento?.IdDocumento}`,
+                              );
                             }}
                             target="_blank"
                           >
-                            {anexo.name}
+                            {doc.Documento
+                              ? `${
+                                  doc.Documento.TipoDocumento?.Descripcion?.substring(
+                                    0,
+                                    3,
+                                  ) ?? "Doc"
+                                }. ${doc.Documento.CodigoReferenciaDoc ?? ""} `
+                              : ""}{" "}
                           </a>
-                          <span className="flex flex-row gap-2  m-0">
+                          <span className="flex flex-column m-0">
                             <span className="text-sm">
-                              {anexo.type.split("/")[1].toUpperCase()}
+                              {doc.Documento.Asunto}
                             </span>
-                            <span className="text-sm">-</span>
-                            <span className="text-sm">
-                              {formatFileSize(anexo.size)}
+                            <span className="text-xs font-bold">
+                              {doc.Documento.CreadoEl
+                                ? formatDate(new Date(doc.Documento.CreadoEl))
+                                : ""}{" "}
                             </span>
                           </span>
                         </div>
@@ -413,17 +795,16 @@ const TramiteSeguimiento = () => {
                       <div className="flex align-items-center justify-content-center pr-1">
                         <Tooltip target=".icon-bolt" />
 
-                        <i
-                          className="pi pi-trash m-1"
-                          style={{ color: "#559", fontSize: "1rem" }}
-                          onClick={() => {
-                            setSelectedAnexos((prev) => {
-                              return prev.filter(
-                                (p) => p.lastModified != anexo.lastModified
-                              );
-                            });
-                          }}
-                        ></i>
+                        {doc.Anexos > 0 && (
+                          <i
+                            data-pr-tooltip="Anexos"
+                            className="pi pi-copy icon-bolt m-1"
+                            style={{
+                              color: "rgba(206, 154, 59, 1)",
+                              fontSize: "1.5rem",
+                            }}
+                          ></i>
+                        )}
                       </div>
                     </div>
                   );
@@ -439,7 +820,7 @@ const TramiteSeguimiento = () => {
         >
           <div className="flex flex-row justify-content-between align-items-center py-2 px-3 border-bottom-1 border-gray-500">
             <label
-              className="block text-900 font-medium"
+              className="block text-900 text-md font-bold"
               style={{
                 width: "20%",
               }}
@@ -501,7 +882,17 @@ const TramiteSeguimiento = () => {
                   : "transform 0.1s ease-out",
               }}
             >
-              <OrganizationChart value={data} nodeTemplate={nodeTemplate} />
+              {/* <OrganizationChart value={data} nodeTemplate={nodeTemplate} /> */}
+              {/* <OrganizationChart
+                value={treeMovimientos ?? []}
+                nodeTemplate={nodeTemplate2}
+              /> */}
+              {treeMovimientos && treeMovimientos.length > 0 && (
+                <OrganizationChart
+                  value={treeMovimientos}
+                  nodeTemplate={nodeTemplate2}
+                />
+              )}
             </div>
           </div>
 

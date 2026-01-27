@@ -1,6 +1,10 @@
 import {
   MovimientoCreate,
+  MovimientoDetailsOut,
   MovimientoOut,
+  MovimientosDetailsOut,
+  MovimientoSeguimiento,
+  MovimientoSeguimientoOut,
   MovimientosOut,
   MovimientoUpdate,
 } from "../interfaces/MovimientoInterface";
@@ -8,6 +12,7 @@ import axios from "axios";
 import { filterBodyRequest, VITE_API_URL_GDS } from "../../utils/Constants";
 import { MOVIMIENTO } from "../service/MovimientoService";
 import { Menssage } from "../../utils/menssage";
+import { CombinationsFilters } from "../../utils/Interfaces";
 
 const UseMovimiento = () => {
   let message = new Menssage();
@@ -40,10 +45,51 @@ const UseMovimiento = () => {
     }
   };
 
+  const findAllDetails = async (
+    combinationsFilters: CombinationsFilters
+  ): Promise<MovimientosDetailsOut | undefined> => {
+    try {
+      const movimientos = await axios.post<MovimientosDetailsOut>(
+        `${VITE_API_URL_GDS + MOVIMIENTO.FIND_ALL_DETAILS}`,
+        combinationsFilters
+      );
+      return movimientos.data;
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
   const findOne = async (id: string): Promise<MovimientoOut | undefined> => {
     try {
       const movimiento = await axios.get<MovimientoOut>(
         `${VITE_API_URL_GDS + MOVIMIENTO.FIND_ONE + id}`
+      );
+      return movimiento.data;
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  const findOneDetails = async (
+    id: string
+  ): Promise<MovimientoDetailsOut | undefined> => {
+    try {
+      const movimiento = await axios.get<MovimientoDetailsOut>(
+        `${VITE_API_URL_GDS + MOVIMIENTO.FIND_ONE_DETAILS + id}`
+      );
+      return movimiento.data;
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  const findOneSeguimiento = async (
+    movimientoSeguimiento: MovimientoSeguimiento
+  ): Promise<MovimientoSeguimientoOut | undefined> => {
+    try {
+      const movimiento = await axios.post<MovimientoSeguimientoOut>(
+        `${VITE_API_URL_GDS + MOVIMIENTO.FIND_ONE_SEGUIMIENTO}`,
+        movimientoSeguimiento
       );
       return movimiento.data;
     } catch (error) {
@@ -77,12 +123,29 @@ const UseMovimiento = () => {
     }
   };
 
+  const removeDetails = async (
+    id: string
+  ): Promise<MovimientoOut | undefined> => {
+    try {
+      const movimiento = await axios.post<MovimientoOut>(
+        `${VITE_API_URL_GDS + MOVIMIENTO.REMOVE_DETAILS + id}`
+      );
+      return movimiento.data;
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
   return {
     create,
     findAll,
+    findAllDetails,
     findOne,
+    findOneDetails,
+    findOneSeguimiento,
     update,
     remove,
+    removeDetails,
   };
 };
 

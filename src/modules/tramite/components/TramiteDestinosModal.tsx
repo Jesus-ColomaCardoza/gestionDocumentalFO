@@ -39,9 +39,9 @@ const TramiteDestinosModal = (props: TramiteDestinosModalProps) => {
   const validateForm = () => {
     let fieldErrors: any = {};
 
-    if (props.movimiento.AreaDestino.IdArea === 0) {
-      fieldErrors.AreaDestino = "Área de destino es obligatorio.";
-    }
+    // if (props.movimiento.AreaDestino.IdArea === 0) {
+    //   fieldErrors.AreaDestino = "Área de destino es obligatorio.";
+    // }
 
     props.setTramiteDestinosErrors(fieldErrors);
 
