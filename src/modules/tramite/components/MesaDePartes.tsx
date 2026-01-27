@@ -1,12 +1,10 @@
 import { Button } from "primereact/button";
-import { InputText } from "primereact/inputtext";
 import { useState, useEffect, useRef } from "react";
 import UseTramite from "../hooks/UseTramite";
 import { TramiteEntity } from "../interfaces/TramiteInterface";
 import { Toast } from "primereact/toast";
 import { emptyTramite } from "../utils/Constants";
-import { Dropdown, DropdownChangeEvent } from "primereact/dropdown";
-import { InputTextarea } from "primereact/inputtextarea";
+import { DropdownChangeEvent } from "primereact/dropdown";
 import { useTheme } from "../../../ThemeContext";
 import UseTipoDocumento from "../../tipo-documento/hooks/UseTipoDocumento";
 import { TipoDocumentoEntity } from "../../tipo-documento/interfaces/TipoDocumentoInterface";
@@ -14,27 +12,20 @@ import { UsuarioEntity } from "../../usuario/interfaces/UsuarioInterface";
 import UseUsuario from "../../usuario/hooks/UseUsuario";
 import { AreaEntity } from "../../area/interfaces/AreaInterface";
 import UseArea from "../../area/hooks/UseArea";
-import FileManagerModal from "../../file-manager/components/FileMangerModal";
 import { FileManagerEntity } from "../../file-manager/interfaces/FileMangerInterface";
-import { Tooltip } from "primereact/tooltip";
 import UseFileManager from "../../file-manager/hooks/UseFileManger";
 import { useAuth } from "../../auth/context/AuthContext";
 import { MAX_FILE_SIZE } from "../../utils/Constants";
-import { formatFileSize } from "../../utils/Methods";
-import TramiteDestinosModal from "./TramiteDestinosModal";
+
 import { MovimientoEntity } from "../../movimiento/interfaces/MovimientoInterface";
 import { emptyMovimiento } from "../../movimiento/utils/Constants";
 import { InputSwitchChangeEvent } from "primereact/inputswitch";
-import { InputNumber, InputNumberChangeEvent } from "primereact/inputnumber";
+import { InputNumberChangeEvent } from "primereact/inputnumber";
 import UseFile from "../../file/hooks/UseFile";
 import UseAnexo from "../../anexo/hooks/UseAnexo";
-import { AnexoEntity } from "../../anexo/interfaces/AnexoInterface";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { Toolbar } from "primereact/toolbar";
-import { Menu } from "primereact/menu";
-import { Checkbox } from "primereact/checkbox";
-import TyCModal from "./TyCModal";
-import { Message } from "primereact/message";
+import { formatDate } from "../../utils/Methods";
 
 const MesaDePartes = () => {
   // custom hooks
@@ -44,19 +35,9 @@ const MesaDePartes = () => {
 
   const userAuth = authContext?.userAuth;
 
-  const { createEmitido } = UseTramite();
+  const params = useParams();
 
-  const { createDocumento } = UseFileManager();
-
-  const { create: createAnexo } = UseAnexo();
-
-  const { create: createFile, remove: removeFile } = UseFile();
-
-  const { findAll: findAllTipoDocumento } = UseTipoDocumento();
-
-  const { findAll: findAllRemitentes } = UseUsuario();
-
-  const { findAll: findAllAreas } = UseArea();
+  const { findOne } = UseTramite();
 
   const navigate = useNavigate();
 
@@ -68,586 +49,31 @@ const MesaDePartes = () => {
   const anexosRef = useRef<HTMLInputElement>(null);
 
   //useStates
-  const [typePerson, setTypePerson] = useState(0);
-
-  const [submitted, setSubmitted] = useState<boolean>(false);
 
   const [loading, setLoading] = useState<boolean>(true);
 
-  const [loadingTramiteCreateOrUpdate, setLoadingTramiteCreateOrUpdate] =
-    useState<boolean>(false);
-
   const [tramite, setTramite] = useState<TramiteEntity>(emptyTramite);
 
-  const [movimiento, setMovimiento] =
-    useState<MovimientoEntity>(emptyMovimiento);
-
-  const [tramiteErrors, setTramiteErrors] = useState<any>({});
-
-  const [tramiteDestinosErrors, setTramiteDestinosErrors] = useState<any>({});
-
-  const [tramites, setTramites] = useState<TramiteEntity[]>([]);
-
-  const [tiposDocumento, setTiposDocumento] = useState<
-    Pick<TipoDocumentoEntity, "IdTipoDocumento" | "Descripcion">[]
-  >([]);
-
-  const [remitentes, setRemitentes] = useState<
-    Pick<
-      UsuarioEntity,
-      "IdUsuario" | "Nombres" | "ApellidoPaterno" | "ApellidoMaterno"
-    >[]
-  >([]);
-
-  const [areas, setAreas] = useState<
-    Pick<AreaEntity, "IdArea" | "Descripcion">[]
-  >([]);
-
-  const [fileManagerDialog, setFileManagerDialog] = useState<boolean>(false);
-
-  const [tramiteDestinosDialog, setTramiteDestinosDialog] =
-    useState<boolean>(false);
-
-  const [selectedDigitalFiles, setSelectedDigitalFiles] = useState<
-    FileManagerEntity[]
-  >([]);
-
-  const [selectedTramiteDestinos, setSelectedTramiteDestinos] = useState<
-    MovimientoEntity[]
-  >([]);
-
-  const [selectedLoadFiles, setSelectedLoadFiles] = useState<File[]>([]);
-
-  const [selectedAnexos, setSelectedAnexos] = useState<File[]>([]);
-
   //functions
-  const createTramiteEmitido = async () => {
-    setSubmitted(true);
-    if (
-      tramite.Asunto.trim() &&
-      tramite.IdTipoDocumento != 0 &&
-      tramite.CodigoReferencia.trim() &&
-      tramite.IdRemitente != 0 &&
-      tramite.Folios != 0
-    ) {
-      // setLoadingTramiteCreateOrUpdate(true);
-      let arrayAnexosUpload: AnexoEntity[] = [];
-
-      //1 we create anexos physical files
-      const uploadResults = await Promise.all(
-        Array.from(selectedAnexos).map(async (anexo) => {
-          const formData = new FormData();
-
-          formData.append("file", anexo);
-
-          const anexoUpload = await createFile(formData);
-
-          if (anexoUpload?.message?.msgId === 0) {
-            const data = {
-              Titulo: anexoUpload.registro?.parseoriginalname!,
-              FormatoAnexo: anexoUpload.registro?.mimetype,
-              NombreAnexo: anexoUpload.registro?.filename,
-              UrlAnexo: anexoUpload.registro?.url!,
-              SizeAnexo: anexoUpload.registro?.size,
-              UrlBase: anexoUpload.registro?.path,
-              IdTramite: 0,
-              Activo: true,
-            };
-
-            arrayAnexosUpload.push(data);
-
-            return {
-              success: true,
-              data: data,
-            };
-          } else {
-            return {
-              success: false,
-              error: anexoUpload?.message?.msgTxt || "Error desconocido",
-            };
-          }
-        })
-      );
-
-      // const successfulUploads = uploadResults
-      //   .filter((r) => r.success)
-      //   .map((r) => r.data);
-
-      const failedUploads = uploadResults.filter((r) => !r.success);
-
-      if (failedUploads.length > 0) {
-        toast.current?.show({
-          severity: "error",
-          detail: "No se pudieron cargar todos los anexos.",
-          life: 3000,
-        });
-        return;
-      }
-
-      //2 we create tramite
-      let tramiteCreateEmitido = await createEmitido({
-        CodigoReferencia: tramite.CodigoReferencia,
-        Asunto: tramite.Asunto,
-        // Descripcion: tramite.Descripcion,
-        Observaciones: tramite.Observaciones,
-        FechaInicio: new Date().toISOString(),
-        // FechaFin:tramite.FechaFin,
-        Folios: tramite.Folios,
-
-        IdTipoTramite: tramite.IdTipoTramite || 1, // IdTipoTramite - 1 - interno
-
-        IdTipoDocumento: tramite.IdTipoDocumento,
-        IdAreaEmision: tramite.IdAreaEmision,
-        IdEstado: tramite.IdEstado || 1, // IdTipoTramite - 1 - ver estado nuevo o algo asi
-        IdRemitente: tramite.IdRemitente,
-        Activo: tramite.Activo,
-
-        DigitalFiles: selectedDigitalFiles,
-        TramiteDestinos: selectedTramiteDestinos,
-        Anexos: arrayAnexosUpload,
-      });
-
-      // setLoadingTramiteCreateOrUpdate(false);
-
-      if (
-        tramiteCreateEmitido?.message.msgId == 0 &&
-        tramiteCreateEmitido.registro
-      ) {
-        setTramites([...tramites, tramiteCreateEmitido.registro]);
-
-        navigate("../tramite/emitido");
-
-        toast.current?.show({
-          severity: "success",
-          detail: `${tramiteCreateEmitido.message.msgTxt}`,
-          life: 3000,
-        });
-      } else if (tramiteCreateEmitido?.message.msgId == 1) {
-        toast.current?.show({
-          severity: "error",
-          detail: `${tramiteCreateEmitido.message.msgTxt}`,
-          life: 3000,
-        });
-      }
-
-      // setSelectedAnexos([])
-      // setFileManagerDialog(false);
-      // setTramite(emptyTramite);
-    }
-  };
-
-  // actions CRUD - Esquema TipoDocumento (create, read, update, remove) -> (create, findAll-findOne, update, remove)
-  const findAllTipoDocumentoCombox = async () => {
+  const findOneTramite = async () => {
     setLoading(true);
-    const tiposDocumentoFindAll = await findAllTipoDocumento();
+
+    const tramite = await findOne(params.id?.toString() || "0");
+
+    console.log(tramite);
+
     setLoading(false);
 
-    if (
-      tiposDocumentoFindAll?.message.msgId == 0 &&
-      tiposDocumentoFindAll.registro
-    ) {
-      setTiposDocumento(
-        Array.isArray(tiposDocumentoFindAll.registro)
-          ? tiposDocumentoFindAll.registro?.map((af) => {
-              return {
-                IdTipoDocumento: af.IdTipoDocumento,
-                Descripcion: af.Descripcion,
-              };
-            })
-          : []
-      );
+    if (tramite?.message.msgId == 0 && tramite.registro) {
+      setTramite(tramite.registro);
     }
-  };
-
-  // actions CRUD - Remitente (create, read, update, remove) -> (create, findAll-findOne, update, remove)
-  const findAllRemitenteCombox = async () => {
-    setLoading(true);
-    const remitentesFindAll = await findAllRemitentes();
-    setLoading(false);
-
-    if (remitentesFindAll?.message.msgId == 0 && remitentesFindAll.registro) {
-      setRemitentes(
-        Array.isArray(remitentesFindAll.registro)
-          ? remitentesFindAll.registro?.map((af) => {
-              return {
-                IdUsuario: af.IdUsuario,
-                Nombres: af.Nombres,
-                ApellidoPaterno: af.ApellidoPaterno,
-                ApellidoMaterno: af.ApellidoMaterno,
-                NombreCompleto: `${af.Nombres} ${af.ApellidoPaterno} ${af.ApellidoMaterno}`,
-              };
-            })
-          : []
-      );
-    }
-  };
-
-  // actions CRUD - Area (create, read, update, remove) -> (create, findAll-findOne, update, remove)
-  const findAllAreaCombox = async () => {
-    setLoading(true);
-    const areasFindAll = await findAllAreas();
-    setLoading(false);
-
-    if (areasFindAll?.message.msgId == 0 && areasFindAll.registro) {
-      setAreas(
-        Array.isArray(areasFindAll.registro)
-          ? areasFindAll.registro?.map((af) => {
-              return {
-                IdArea: af.IdArea,
-                Descripcion: af.Descripcion,
-              };
-            })
-          : []
-      );
-    }
-  };
-
-  // templates to dialogs
-  const hideFileManagerDialog = () => {
-    setSubmitted(false);
-    setFileManagerDialog(false);
-  };
-
-  const showFileManagerDialog = () => {
-    setSubmitted(false);
-    setFileManagerDialog(true);
-  };
-
-  const hideTramiteDestinosDialog = () => {
-    setSubmitted(false);
-    setTramiteDestinosErrors({});
-    setMovimiento(emptyMovimiento);
-    setTramiteDestinosDialog(false);
-  };
-
-  const showTramiteDestinosDialog = () => {
-    setSubmitted(false);
-    setTramiteDestinosDialog(true);
-  };
-
-  const onChangeLoadFiles = async (
-    event: React.ChangeEvent<HTMLInputElement>
-  ) => {
-    const files = event.target.files;
-
-    if (files && files.length > 0) {
-      // setLoadingDocumentoCreateOrUpdate(true);
-
-      // we validate if there is some file exceeds the limit size
-      const invalidFiles = Array.from(files).filter(
-        (file) => file.size > MAX_FILE_SIZE
-      );
-
-      if (invalidFiles.length > 0) {
-        toast.current?.show({
-          severity: "warn",
-          detail: `El archivo "${invalidFiles[0].name}" supera el límite de 2MB.`,
-          life: 3000,
-        });
-
-        // clear input file
-        if (loadFilesRef.current) {
-          loadFilesRef.current.value = "";
-        }
-
-        return;
-      }
-
-      const formData = new FormData();
-
-      Array.from(files).forEach((fileUpload) => {
-        formData.append("file", fileUpload);
-      });
-
-      const fileUpload = await createFile(formData);
-
-      if (fileUpload?.message.msgId == 0) {
-        let documentoCreate = await createDocumento({
-          FormatoDocumento: fileUpload.registro?.mimetype,
-          NombreDocumento: fileUpload.registro?.filename,
-          UrlDocumento: fileUpload.registro?.url,
-          SizeDocumento: fileUpload.registro?.size,
-          UrlBase: fileUpload.registro?.path,
-          Titulo: fileUpload.registro?.parseoriginalname,
-          Descripcion: fileUpload.registro?.filename,
-          IdUsuario: userAuth?.IdUsuario,
-          FirmaDigital: true,
-          IdCarpeta: null,
-          Categoria: "MF",
-          IdEstado: 1, // set at diagram state
-          Activo: true,
-        });
-
-        // setLoadingDocumentoCreateOrUpdate(false);
-
-        if (documentoCreate?.message.msgId == 0 && documentoCreate.registro) {
-          setSelectedDigitalFiles((prev) => [
-            ...prev,
-            documentoCreate.registro!,
-          ]);
-
-          toast.current?.show({
-            severity: "success",
-            detail: `${documentoCreate.message.msgTxt}`,
-            life: 3000,
-          });
-        } else {
-          toast.current?.show({
-            severity: "error",
-            detail: `${fileUpload?.message.msgTxt}`,
-            life: 3000,
-          });
-        }
-      } else {
-        toast.current?.show({
-          severity: "error",
-          detail: `${fileUpload?.message.msgTxt}`,
-          life: 3000,
-        });
-      }
-
-      // clear input file
-      if (loadFilesRef.current) {
-        loadFilesRef.current.value = "";
-      }
-    }
-  };
-
-  const onChangeAnexos = async (event: React.ChangeEvent<HTMLInputElement>) => {
-    const files = event.target.files;
-
-    if (files && files.length > 0) {
-      // setLoadingDocumentoCreateOrUpdate(true);
-
-      // we validate if there is some file exceeds the limit size
-      const invalidFiles = Array.from(files).filter(
-        (file) => file.size > MAX_FILE_SIZE
-      );
-
-      if (invalidFiles.length > 0) {
-        toast.current?.show({
-          severity: "warn",
-          detail: `El archivo "${invalidFiles[0].name}" supera el límite de 2MB.`,
-          life: 3000,
-        });
-
-        // clear input file
-        if (anexosRef.current) {
-          anexosRef.current.value = "";
-        }
-
-        return;
-      }
-
-      // console.log(Array.from(files));
-
-      setSelectedAnexos((prev) => [...prev, ...Array.from(files)]);
-      // const formData = new FormData();
-
-      // Array.from(files).forEach((fileUpload) => {
-      //   formData.append("file", fileUpload);
-      // });
-
-      // const fileUpload = await createFile(formData);
-
-      // if (fileUpload?.message.msgId == 0) {
-      //   let documentoCreate = await createDocumento({
-      //     FormatoDocumento: fileUpload.registro?.mimetype,
-      //     NombreDocumento: fileUpload.registro?.filename,
-      //     UrlDocumento: fileUpload.registro?.url,
-      //     SizeDocumento: fileUpload.registro?.size,
-      //     UrlBase: fileUpload.registro?.path,
-      //     Titulo: fileUpload.registro?.parseoriginalname,
-      //     Descripcion: fileUpload.registro?.filename,
-      //     IdUsuario: userAuth?.IdUsuario,
-      //     FirmaDigital: true,
-      //     IdCarpeta: null,
-      //     Categoria: "MF",
-      //     IdEstado: 1, // set at diagram state
-      //     Activo: true,
-      //   });
-
-      //   // setLoadingDocumentoCreateOrUpdate(false);
-
-      //   if (documentoCreate?.message.msgId == 0 && documentoCreate.registro) {
-      //     setSelectedDigitalFiles((prev) => [
-      //       ...prev,
-      //       documentoCreate.registro!,
-      //     ]);
-
-      //     toast.current?.show({
-      //       severity: "success",
-      //       detail: `${documentoCreate.message.msgTxt}`,
-      //       life: 3000,
-      //     });
-      //   } else {
-      //     toast.current?.show({
-      //       severity: "error",
-      //       detail: `${fileUpload?.message.msgTxt}`,
-      //       life: 3000,
-      //     });
-      //   }
-      // } else {
-      //   toast.current?.show({
-      //     severity: "error",
-      //     detail: `${fileUpload?.message.msgTxt}`,
-      //     life: 3000,
-      //   });
-      // }
-
-      // clear input file
-      if (anexosRef.current) {
-        anexosRef.current.value = "";
-      }
-    }
-  };
-
-  // onChanges
-  const onInputTextChange = (
-    e: React.ChangeEvent<HTMLInputElement>,
-    name: string
-  ) => {
-    const val = (e.target && e.target.value) || "";
-
-    setTramite((prev) => ({
-      ...prev,
-      [name]: val,
-    }));
-
-    setTramiteErrors((prev: any) => ({ ...prev, [name]: undefined }));
-  };
-
-  const onInputNumberChange = (e: InputNumberChangeEvent, name: string) => {
-    const val = e.value ?? null;
-
-    setTramite((prev) => ({
-      ...prev,
-      [name]: val,
-    }));
-
-    setTramiteErrors((prev: any) => ({ ...prev, [name]: undefined }));
-  };
-
-  const onInputTextAreaChange = (
-    e: React.ChangeEvent<HTMLTextAreaElement>,
-    name: string
-  ) => {
-    const val = (e.target && e.target.value) || "";
-    let _tramite = { ...tramite };
-
-    // @ts-ignore
-    _tramite[name] = val;
-
-    setTramite(_tramite);
-
-    setTramiteErrors((prev: any) => ({ ...prev, [name]: undefined }));
-  };
-
-  const onDropdownChange = (
-    e: DropdownChangeEvent,
-    nameObj: string,
-    nameFK: string,
-    nameTagFK?: string
-  ) => {
-    const val = (e.target && e.target.value) || "";
-
-    let _tramite: any = { ...tramite };
-
-    _tramite[nameTagFK ? nameTagFK : nameFK] = val[nameFK];
-    _tramite[nameObj] = { ...val };
-
-    setTramite(_tramite);
-
-    setTramiteErrors((prev: any) => ({
-      ...prev,
-      [nameTagFK ? nameTagFK : nameFK]: undefined,
-    }));
-  };
-
-  const onDropdownChangeMovimiento = (
-    e: DropdownChangeEvent,
-    nameObj: string,
-    nameFK: string,
-    nameTagFK?: string
-  ) => {
-    const val = (e.target && e.target.value) || "";
-
-    let _movimiento: any = { ...movimiento };
-
-    _movimiento[nameTagFK ? nameTagFK : nameFK] = val[nameFK];
-
-    if (nameObj !== "") {
-      _movimiento[nameObj] = { ...val };
-    }
-
-    setMovimiento(_movimiento);
-  };
-
-  const onDropdownChangeX = (
-    //onchangegeneral of text , to do: number
-    e: DropdownChangeEvent,
-    state: any,
-    setState: React.Dispatch<React.SetStateAction<any>>,
-    nameObj: string,
-    nameFK: string,
-    nameTagFK?: string
-  ) => {
-    const val = (e.target && e.target.value) || "";
-
-    let _state: any = { ...state };
-
-    _state[nameTagFK ? nameTagFK : nameFK] = val[nameFK];
-
-    if (nameObj !== "") {
-      _state[nameObj] = { ...val };
-    }
-
-    setState(_state);
-  };
-
-  const onSwitchChange = (e: InputSwitchChangeEvent, name: string) => {
-    let _movimiento: any = { ...movimiento };
-    _movimiento[name] = e.value;
-    setMovimiento(_movimiento);
-  };
-
-  const validateForm = () => {
-    let fieldErrors: any = {};
-
-    if (!tramite.Asunto.trim()) {
-      fieldErrors.Asunto = "Asunto es obligatorio.";
-    }
-
-    if (tramite.IdTipoDocumento == 0) {
-      fieldErrors.IdTipoDocumento = "Tipo de documento es obligatorio.";
-    }
-
-    if (!tramite.CodigoReferencia.trim()) {
-      fieldErrors.CodigoReferencia = "Codigo de referencia es obligatoria.";
-    }
-
-    if (tramite.IdRemitente == 0) {
-      fieldErrors.IdRemitente = "Remitente es obligatorio.";
-    }
-
-    if (tramite.Folios == 0) {
-      fieldErrors.Folios = "Folios es obligatorio.";
-    }
-
-    if (tramite.IdAreaEmision == 0) {
-      fieldErrors.IdAreaEmision = "Área de emisión es obligatoria.";
-    }
-
-    setTramiteErrors(fieldErrors);
-
-    return Object.keys(fieldErrors).length === 0;
   };
 
   //useEffects
   useEffect(() => {
-    findAllTipoDocumentoCombox();
-    findAllRemitenteCombox();
-    findAllAreaCombox();
+    if (params?.id) {
+      findOneTramite();
+    }
   }, []);
 
   return (
@@ -658,6 +84,7 @@ const MesaDePartes = () => {
         flexDirection: "column",
         padding: "0",
         width: "50%",
+        margin: "2rem auto",
       }}
     >
       <Toast ref={toast} position={"bottom-right"} />
@@ -676,12 +103,18 @@ const MesaDePartes = () => {
         }
       />
 
-      <div className="flex flex-column gap-1 justify-content-between mb-2 border-solid border-1 border-gray-500 border-round-md">
+      <div
+        id="tramite_detalle"
+        className="flex flex-column gap-1 justify-content-between mb-2 border-solid border-1 border-gray-500 border-round-md"
+      >
         <div className="flex flex-row gap-3 justify-content-start align-items-center py-3 px-4 border-bottom-1 border-gray-500">
           <div>
-            <i className="pi pi-check-circle text-xl" style={{
-              color:"#4a4"
-            }}></i>
+            <i
+              className="pi pi-check-circle text-xl"
+              style={{
+                color: "#4a4",
+              }}
+            ></i>
           </div>
           <div>
             <label className="block text-900 font-medium mb-1">
@@ -702,7 +135,9 @@ const MesaDePartes = () => {
             <label className="block text-900 text-sm font-medium mb-2">
               CÓDIGO ÚNICO DE TRÁMITE
             </label>
-            <span className="block text-900 text-xs mb-2">00000000000089</span>
+            <span className="block text-900 text-xs mb-2">
+              {tramite?.IdTramite.toString().padStart(8, "0")}
+            </span>
           </div>
         </div>
 
@@ -716,7 +151,9 @@ const MesaDePartes = () => {
               FECHA DE REGISTRO
             </label>
             <span className="block text-900 text-xs mb-2">
-              {new Date().toLocaleString()}
+              {tramite?.CreadoEl
+                ? formatDate(new Date(tramite?.CreadoEl))
+                : "--:--:--"}
             </span>
           </div>
         </div>
@@ -730,7 +167,13 @@ const MesaDePartes = () => {
             <label className="block text-900 text-sm font-medium mb-2">
               REMITENTE
             </label>
-            <span className="block text-900 text-xs mb-2">Archivo digital</span>
+            <span className="block text-900 text-xs mb-2">
+              {tramite.Remitente.Nombres +
+                " " +
+                tramite.Remitente.ApellidoPaterno +
+                " " +
+                tramite.Remitente.ApellidoMaterno}
+            </span>
           </div>
         </div>
 
@@ -739,7 +182,59 @@ const MesaDePartes = () => {
             type="button"
             severity="warning"
             onClick={() => {
-              loadFilesRef.current?.click();
+              const ventanaImpresion = window.open("", "_blank");
+
+              if (ventanaImpresion) {
+                // 1. Crear la estructura básica
+                ventanaImpresion.document.title = "Imprimir";
+
+                // 2. Inyectar el contenido en el cuerpo del nuevo documento
+                ventanaImpresion.document.body.innerHTML = `<!DOCTYPE html>
+                  <html lang="es">
+                  <head>
+                      <meta charset="UTF-8">
+                      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+                      <title>Registro Exitoso</title>
+                      <!-- Enlace a un icono de éxito, por ejemplo, Font Awesome CDN -->
+                      <link rel="stylesheet" href="https://cdnjs.cloudflare.com">
+                  </head>
+                  <body style="font-family: sans-serif; background-color: #eef1f4; display: flex; justify-content: center; align-items: center; height: 100vh; margin: auto;">
+                      <div class="card-container" style="margin: auto; background-color: #fff; border-radius: 8px; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); width: 100%; max-width: 400px; overflow: hidden;">
+                          <div class="card-header" style="display: flex; align-items: center; padding: 20px; border-bottom: 1px solid #eee;">
+                              <!-- Icono de éxito (usando Font Awesome) -->
+                              <i class="fas fa-check-circle success-icon" style="color: #4CAF50; font-size: 30px; margin-right: 15px;"></i>
+                              <div class="header-text" style="display: flex; flex-direction: column;">
+                                  <h1 style="font-size: 18px; margin: 0; color: #333;">Registro exitoso</h1>
+                                  <p style="font-size: 14px; color: #666; margin: 5px 0 0;">Tu documento ha sido registrado y enviado a mesa de partes</p>
+                              </div>
+                          </div>
+                          
+                          <div class="card-body" style="padding: 20px;">
+                              <div class="detail-item" style="display: flex; flex-direction: column; margin-bottom: 15px;">
+                                  <span class="label" style="font-size: 12px; color: #999; text-transform: uppercase; margin-bottom: 4px; font-weight: 500;">CÓDIGO ÚNICO DE TRÁMITE</span>
+                                  <span class="value" style="font-size: 16px; color: #333; font-weight: bold;">${tramite?.IdTramite?.toString().padStart(8, "0")}</span>
+                              </div>
+                              <div class="detail-item" style="display: flex; flex-direction: column; margin-bottom: 15px;">
+                                  <span class="label" style="font-size: 12px; color: #999; text-transform: uppercase; margin-bottom: 4px; font-weight: 500;">FECHA DE REGISTRO</span>
+                                  <span class="value" style="font-size: 16px; color: #333; font-weight: bold;">${
+                                    tramite?.CreadoEl
+                                      ? formatDate(new Date(tramite?.CreadoEl))
+                                      : "--:--:--"
+                                  }</span>
+                              </div>
+                              <div class="detail-item" style="display: flex; flex-direction: column; margin-bottom: 0;">
+                                  <span class="label" style="font-size: 12px; color: #999; text-transform: uppercase; margin-bottom: 4px; font-weight: 500;">REMITENTE</span>
+                                  <span class="value" style="font-size: 16px; color: #333; font-weight: bold;">${tramite?.Remitente?.Nombres + " " + tramite?.Remitente?.ApellidoPaterno + " " + tramite?.Remitente?.ApellidoMaterno}</span>
+                              </div>
+                          </div>
+                      </div>
+                  </body>
+                  </html>
+                  `;
+
+                // 4. Imprimir y cerrar
+                ventanaImpresion.print();
+              }
             }}
             size="small"
             style={{

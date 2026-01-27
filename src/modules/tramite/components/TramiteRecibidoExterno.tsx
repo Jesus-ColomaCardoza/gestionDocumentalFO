@@ -329,15 +329,19 @@ const TramiteRecibidoExterno = () => {
       ) {
         setTramites([...tramites, tramiteCreateEmitido.registro]);
 
+        
         setSelectedAnexos([]);
-
+        
         toast.current?.show({
           severity: "success",
           detail: `${tramiteCreateEmitido.message.msgTxt}`,
           life: 3000,
         });
 
-        navigate("/mesa_de_partes");
+        console.log(tramiteCreateEmitido.registro);
+        
+        navigate("/mesa_de_partes/" + tramiteCreateEmitido.registro.TramiteEmitido.IdTramite);
+
       } else if (tramiteCreateEmitido?.message.msgId == 1) {
         toast.current?.show({
           severity: "error",

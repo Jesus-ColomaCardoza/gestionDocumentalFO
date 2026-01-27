@@ -49,9 +49,9 @@ const UseTramite = () => {
 
   const recibirExterno2 = async (
     tramiteExternoRecibir2: TramiteExternoRecibir2
-  ): Promise<TramiteOut | undefined> => {
+  ): Promise<any | undefined> => {
     try {
-      const tramite = await axios.post<TramiteOut>(
+      const tramite = await axios.post<any>(
         `${VITE_API_URL_GDS + TRAMITE.RECIBIR_EXTERNO2}`,
         tramiteExternoRecibir2
       );

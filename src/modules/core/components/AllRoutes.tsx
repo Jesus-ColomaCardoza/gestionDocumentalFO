@@ -47,7 +47,7 @@ const AllRoutes = () => {
 
             <Route path="/" element={<Dashboard />}>
               <Route path="inicio" element={<TramiteEmitidoNuevo />}></Route>
-              <Route path="mesa_de_partes" element={<MesaDePartes />}></Route>
+              <Route path="mesa_de_partes/:id" element={<MesaDePartes />}></Route>
               <Route path="tramite/nuevo" element={<TramiteRecibidoExterno />}></Route>
               <Route path="tramite/seguimiento" element={<TramiteRecibidoAtendido />}></Route>
               <Route path="tramite/seguimiento/resultado" element={<TramiteSeguimiento />}></Route>
