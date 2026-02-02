@@ -5,6 +5,7 @@ export const MOVIMIENTO = {
   FIND_ONE: "/movimiento/find_one/",
   FIND_ONE_DETAILS: "/movimiento/find_one_details/",
   FIND_ONE_SEGUIMIENTO: "/movimiento/find_one_seguimiento/",
+  FIND_ONE_SEGUIMIENTO2: "/movimiento/find_one_seguimiento2/",
   UPDATE: "/movimiento/update/",
   REMOVE: "/movimiento/remove/",
   REMOVE_DETAILS: "/movimiento/remove_details/",

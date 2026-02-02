@@ -1743,7 +1743,7 @@ const TramiteRecibidoExterno = () => {
         </div>
       </div>
 
-      <div className="flex flex-row mt-5 pb-3 px-4" style={{ gap: "1rem" }}>
+      <div className="flex flex-row mt-5 pb-3 " style={{ gap: "2rem" }}>
         <Button
           type="button"
           // onClick={findAllTramite}

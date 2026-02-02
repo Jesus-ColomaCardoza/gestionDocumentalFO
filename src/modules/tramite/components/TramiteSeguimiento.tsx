@@ -26,7 +26,7 @@ const TramiteSeguimiento = () => {
 
   const navigate = useNavigate();
 
-  const { findOneSeguimiento } = UseMovimiento();
+  const { findOneSeguimiento2 } = UseMovimiento();
 
   const params = useParams();
 
@@ -362,9 +362,8 @@ const TramiteSeguimiento = () => {
   const findOneSeguimientoMovimiento = async () => {
     setLoading(true);
 
-    const movimiento = await findOneSeguimiento({
-      IdTramite: parseInt(params.id ?? "66") || 0,
-      IdMovimiento: parseInt(params.id2 ?? "105") || 0,
+    const movimiento = await findOneSeguimiento2({
+      IdTramite: parseInt(params.id ?? "") || 0,
     });
 
     setLoading(false);
@@ -441,7 +440,7 @@ const TramiteSeguimiento = () => {
   }, [transform.scale]);
 
   useEffect(() => {
-    if (params?.id && params?.id2) {
+    if (params?.id) {
       findOneSeguimientoMovimiento();
     }
   }, []);

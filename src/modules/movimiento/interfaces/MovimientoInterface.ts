@@ -276,6 +276,9 @@ export interface MovimientoSeguimiento {
   IdMovimiento?: number;
   IdTramite?: number;
 }
+export interface MovimientoSeguimiento2 {
+  IdTramite?: number;
+}
 export interface MovimientoOut {
   message: Message;
   registro?: MovimientoEntity;
